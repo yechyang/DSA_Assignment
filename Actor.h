@@ -47,7 +47,7 @@ public:
     void updateDetails(const string& newName, int newBirthYear);
 
     const MovieNode* getMovies() const;
-
+    Movie** getSortedMovies(int& count) const;
 
     // Display actor details and their movies
     void display() const;

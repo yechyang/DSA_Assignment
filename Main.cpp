@@ -561,17 +561,28 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
                 cerr << "Error: Movie not found." << endl;
             }
         } else if (choice == 5) {
-            // Display all movies of an actor
             int actorId;
             cout << "Enter Actor ID: ";
             cin >> actorId;
 
             Actor* actor = actorTable.search(actorId);
-            if (actor) {
-                actor->display();
-            } else {
+            if (!actor) {
                 cerr << "Error: Actor not found." << endl;
+                return;
             }
+
+            // Use the Actor's getSortedMovies() method
+            int movieCount;
+            Movie** sortedMovies = actor->getSortedMovies(movieCount);
+
+            // Display sorted movies
+            cout << "Movies starred by " << actor->getName() << " (sorted alphabetically):" << endl;
+            for (int i = 0; i < movieCount; i++) {
+                cout << "- " << sortedMovies[i]->getTitle() << " (" << sortedMovies[i]->getReleaseYear() << ")" << endl;
+            }
+
+            // Free allocated memory
+            delete[] sortedMovies;
         } else if (choice == 6) {
             // Exit
             cout << "Exiting application. Goodbye!" << endl;
