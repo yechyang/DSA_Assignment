@@ -41,6 +41,9 @@ public:
     // Add a movie to the actor's list
     void addMovie(Movie* movie);
 
+    // Update Actor details
+    void updateDetails(const string& newName, int newBirthYear);
+
     // Display actor details and their movies
     void display() const;
 };

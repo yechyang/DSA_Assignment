@@ -36,6 +36,21 @@ void Movie::addActor(Actor* actor) {
     actorHead = newNode;
 }
 
+
+void Movie::updateDetails(const string& newTitle, const string& newPlot, int newReleaseYear) {
+    if (!newTitle.empty()) {
+        title = newTitle;
+    }
+    if (!newPlot.empty()) {
+        plot = newPlot;
+    }
+    if (newReleaseYear > 0) {
+        releaseYear = newReleaseYear;
+    }
+    cout << "Movie details updated successfully." << endl;
+}
+
+
 // Display movie details and their actors
 void Movie::display() const {
     cout << "Movie ID: " << id << ", \nTitle: " << title

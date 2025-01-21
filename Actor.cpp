@@ -34,6 +34,16 @@ void Actor::addMovie(Movie* movie) {
     movieHead = newNode;
 }
 
+void Actor::updateDetails(const string& newName, int newBirthYear) {
+    if (!newName.empty()) {
+        name = newName;
+    }
+    if (newBirthYear > 0) {
+        birthYear = newBirthYear;
+    }
+    cout << "Actor details updated successfully." << endl;
+}
+
 // Display actor details and their movies
 void Actor::display() const {
     cout << "Actor ID: " << id << ", \nName: " << name << ", \nBirth Year: " << birthYear << endl;
@@ -45,3 +55,4 @@ void Actor::display() const {
         current = current->next;
     }
 }
+

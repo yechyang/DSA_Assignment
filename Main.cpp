@@ -386,6 +386,8 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         cout << "4. Display all actors in a movie\n";
         cout << "5. Display all movies of an actor\n";
         cout << "6. Exit\n";
+        cout << "7. Update actor details\n";
+        cout << "8. Update movie details\n";
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -467,6 +469,48 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Exit
             cout << "Exiting application. Goodbye!" << endl;
             break;
+        } else if (choice == 7) {
+            // Update actor details
+            int actorId;
+            cout << "Enter Actor ID to update: ";
+            cin >> actorId;
+
+            Actor* actor = actorTable.search(actorId);
+            if (actor) {
+                string newName;
+                int newBirthYear;
+                cout << "Enter new name (leave empty to keep current): ";
+                cin.ignore();
+                getline(cin, newName);
+                cout << "Enter new birth year (enter 0 to keep current): ";
+                cin >> newBirthYear;
+
+                actor->updateDetails(newName, newBirthYear);
+            } else {
+                cerr << "Error: Actor not found." << endl;
+            }
+        } else if (choice == 8) {
+            // Update movie details
+            int movieId;
+            cout << "Enter Movie ID to update: ";
+            cin >> movieId;
+
+            Movie* movie = movieTable.search(movieId);
+            if (movie) {
+                string newTitle, newPlot;
+                int newReleaseYear;
+                cout << "Enter new title (leave empty to keep current): ";
+                cin.ignore();
+                getline(cin, newTitle);
+                cout << "Enter new plot (leave empty to keep current): ";
+                getline(cin, newPlot);
+                cout << "Enter new release year (enter 0 to keep current): ";
+                cin >> newReleaseYear;
+
+                movie->updateDetails(newTitle, newPlot, newReleaseYear);
+            } else {
+                cerr << "Error: Movie not found." << endl;
+            }
         } else {
             cerr << "Invalid choice. Please try again." << endl;
         }
