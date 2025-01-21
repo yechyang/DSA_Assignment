@@ -27,7 +27,9 @@ public:
 
     // Destructor
     ~Actor();
-
+    MovieNode* getMovieHead() const {
+        return movieHead;
+    }
     // Getter methods
     int getId() const;
     string getName() const;
@@ -43,6 +45,9 @@ public:
 
     // Update Actor details
     void updateDetails(const string& newName, int newBirthYear);
+
+    const MovieNode* getMovies() const;
+
 
     // Display actor details and their movies
     void display() const;

@@ -34,6 +34,11 @@ void Actor::addMovie(Movie* movie) {
     movieHead = newNode;
 }
 
+// New method to return the head of the movie list
+const MovieNode* Actor::getMovies() const {
+    return movieHead;
+}
+
 void Actor::updateDetails(const string& newName, int newBirthYear) {
     if (!newName.empty()) {
         name = newName;

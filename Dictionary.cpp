@@ -190,13 +190,11 @@ bool Dictionary<T>::remove(const int& key) {
 template <typename T>
 void Dictionary<T>::display(void (*displayFunc)(const T&)) const {
     for (int i = 0; i < size; ++i) {
-        cout << "Bucket " << i << ": ";
         Node<T>* current = table[i];
         while (current) {
-            displayFunc(current->value);
+            displayFunc(current->value); // Call the user-provided function
             current = current->next;
         }
-        cout << "nullptr\n";
     }
 }
 
