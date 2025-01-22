@@ -559,7 +559,6 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
                 cerr << "Error: Actor or Movie not found." << endl;
             }
         } else if (choice == 4) {
-            // Display all actors in a movie
             int movieId;
             cout << "Enter Movie ID: ";
             cin >> movieId;
@@ -576,14 +575,14 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
             // Display sorted actors
             cout << "Actors in the movie \"" << movie->getTitle() << "\" (sorted alphabetically):" << endl;
-            for (int i = 0; i < actorCount; i++) {
+            for (int i = 0; i < actorCount; ++i) {
                 cout << "- ID: " << sortedActors[i]->getId()
                     << ", Name: " << sortedActors[i]->getName() << endl;
             }
 
-            // Free allocated memory
-            delete[] sortedActors;
-        } else if (choice == 5) {
+            delete[] sortedActors; // Free allocated memory
+        }
+        else if (choice == 5) {
             int actorId;
             cout << "Enter Actor ID: ";
             cin >> actorId;
@@ -599,13 +598,13 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             Movie** sortedMovies = actor->getSortedMovies(movieCount);
 
             // Display sorted movies
-            cout << "Movies starred by " << actor->getName() << " (sorted alphabetically):" << endl;
-            for (int i = 0; i < movieCount; i++) {
-                cout << "- " << sortedMovies[i]->getTitle() << " (" << sortedMovies[i]->getReleaseYear() << ")" << endl;
+            cout << "Movies starring " << actor->getName() << " (sorted alphabetically):" << endl;
+            for (int i = 0; i < movieCount; ++i) {
+                cout << "- Title: " << sortedMovies[i]->getTitle()
+                    << ", Year: " << sortedMovies[i]->getReleaseYear() << endl;
             }
 
-            // Free allocated memory
-            delete[] sortedMovies;
+            delete[] sortedMovies; // Free allocated memory
         } else if (choice == 6) {
             // Exit
             cout << "Exiting application. Goodbye!" << endl;

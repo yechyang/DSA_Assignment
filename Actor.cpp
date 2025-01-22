@@ -61,8 +61,32 @@ void Actor::display() const {
     }
 }
 
+
+// void swap(Movie*& x, Movie*& y) {
+//     Movie* temp = x;
+//     x = y;
+//     y = temp;
+// }
+
+// int indexOfLargest(Movie* array[], int n) {
+//     int largestIndex = 0;
+//     for (int i = 1; i < n; i++) {
+//         if (array[i]->getTitle() > array[largestIndex]->getTitle()) {
+//             largestIndex = i;
+//         }
+//     }
+//     return largestIndex;
+// }
+
+// void selectionSort(Movie* array[], int n) {
+//     for (int last = n - 1; last >= 1; last--) {
+//         int largest = indexOfLargest(array, last + 1);
+//         swap(array[largest], array[last]);
+//     }
+// }
+
 // Movie** Actor::getSortedMovies(int& count) const {
-//     // Step 1: Count the number of movies
+//     // Count the number of movies
 //     count = 0;
 //     MovieNode* currentNode = movieHead;
 //     while (currentNode != nullptr) {
@@ -70,7 +94,7 @@ void Actor::display() const {
 //         currentNode = currentNode->next;
 //     }
 
-//     // Step 2: Allocate an array to store movies
+//     // Allocate an array to store movies
 //     Movie** movies = new Movie*[count];
 //     currentNode = movieHead;
 //     for (int i = 0; i < count; i++) {
@@ -78,69 +102,78 @@ void Actor::display() const {
 //         currentNode = currentNode->next;
 //     }
 
-//     // Step 3: Sort the movies using selection sort
-//     for (int i = 0; i < count - 1; i++) {
-//         int minIndex = i;
-//         for (int j = i + 1; j < count; j++) {
-//             if (movies[j]->getTitle() < movies[minIndex]->getTitle()) {
-//                 minIndex = j;
-//             }
-//         }
-//         // Swap the smallest movie with the current position
-//         if (minIndex != i) {
-//             Movie* temp = movies[i];
-//             movies[i] = movies[minIndex];
-//             movies[minIndex] = temp;
-//         }
-//     }
+//     // Sort the movies
+//     selectionSort(movies, count);
 
-//     // Step 4: Return the sorted array
 //     return movies;
 // }
 
+void mergeMovies(Movie** movies, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
 
-void swap(Movie*& x, Movie*& y) {
-    Movie* temp = x;
-    x = y;
-    y = temp;
-}
+    // Temporary arrays
+    Movie** leftArray = new Movie*[n1];
+    Movie** rightArray = new Movie*[n2];
 
-int indexOfLargest(Movie* array[], int n) {
-    int largestIndex = 0;
-    for (int i = 1; i < n; i++) {
-        if (array[i]->getTitle() > array[largestIndex]->getTitle()) {
-            largestIndex = i;
-        }
+    // Copy data to temporary arrays
+    for (int i = 0; i < n1; ++i)
+        leftArray[i] = movies[left + i];
+    for (int j = 0; j < n2; ++j)
+        rightArray[j] = movies[mid + 1 + j];
+
+    // Merge the arrays back into movies[left..right]
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (leftArray[i]->getTitle() <= rightArray[j]->getTitle())
+            movies[k++] = leftArray[i++];
+        else
+            movies[k++] = rightArray[j++];
     }
-    return largestIndex;
+
+    // Copy remaining elements
+    while (i < n1)
+        movies[k++] = leftArray[i++];
+    while (j < n2)
+        movies[k++] = rightArray[j++];
+
+    // Free temporary arrays
+    delete[] leftArray;
+    delete[] rightArray;
 }
 
-void selectionSort(Movie* array[], int n) {
-    for (int last = n - 1; last >= 1; last--) {
-        int largest = indexOfLargest(array, last + 1);
-        swap(array[largest], array[last]);
+void mergeSortMovies(Movie** movies, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        // Sort first and second halves
+        mergeSortMovies(movies, left, mid);
+        mergeSortMovies(movies, mid + 1, right);
+
+        // Merge the sorted halves
+        mergeMovies(movies, left, mid, right);
     }
 }
 
 Movie** Actor::getSortedMovies(int& count) const {
     // Count the number of movies
     count = 0;
-    MovieNode* currentNode = movieHead;
-    while (currentNode != nullptr) {
+    MovieNode* current = movieHead;
+    while (current != nullptr) {
         count++;
-        currentNode = currentNode->next;
+        current = current->next;
     }
 
-    // Allocate an array to store movies
+    // Create an array to hold the movies
     Movie** movies = new Movie*[count];
-    currentNode = movieHead;
-    for (int i = 0; i < count; i++) {
-        movies[i] = currentNode->movie;
-        currentNode = currentNode->next;
+    current = movieHead;
+    for (int i = 0; i < count; ++i) {
+        movies[i] = current->movie;
+        current = current->next;
     }
 
-    // Sort the movies
-    selectionSort(movies, count);
+    // Apply merge sort
+    mergeSortMovies(movies, 0, count - 1);
 
     return movies;
 }

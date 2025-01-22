@@ -71,49 +71,119 @@ void Movie::display() const {
     }
 }
 
-void swap(Actor*& x, Actor*& y) {
-    Actor* temp = x;
-    x = y;
-    y = temp;
-}
+// void swap(Actor*& x, Actor*& y) {
+//     Actor* temp = x;
+//     x = y;
+//     y = temp;
+// }
 
-int indexOfLargest(Actor* array[], int n) {
-    int largestIndex = 0;
-    for (int i = 1; i < n; i++) {
-        if (array[i]->getName() > array[largestIndex]->getName()) {
-            largestIndex = i;
-        }
+// int indexOfLargest(Actor* array[], int n) {
+//     int largestIndex = 0;
+//     for (int i = 1; i < n; i++) {
+//         if (array[i]->getName() > array[largestIndex]->getName()) {
+//             largestIndex = i;
+//         }
+//     }
+//     return largestIndex;
+// }
+
+// void selectionSort(Actor* array[], int n) {
+//     for (int last = n - 1; last >= 1; last--) {
+//         int largest = indexOfLargest(array, last + 1);
+//         swap(array[largest], array[last]);
+//     }
+// }
+
+// Actor** Movie::getSortedActors(int& count) const {
+//     // Step 1: Count the number of actors
+//     count = 0;
+//     ActorNode* currentNode = actorHead;
+//     while (currentNode != nullptr) {
+//         count++;
+//         currentNode = currentNode->next;
+//     }
+
+//     // Step 2: Allocate an array to store actors
+//     Actor** actors = new Actor*[count];
+//     currentNode = actorHead;
+//     for (int i = 0; i < count; i++) {
+//         actors[i] = currentNode->actor;
+//         currentNode = currentNode->next;
+//     }
+
+//     // Step 3: Sort the actors using selection sort
+//     selectionSort(actors, count);
+
+//     // Step 4: Return the sorted array
+//     return actors;
+// }
+
+void mergeActors(Actor** actors, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+
+    // Temporary arrays
+    Actor** leftArray = new Actor*[n1];
+    Actor** rightArray = new Actor*[n2];
+
+    // Copy data to temporary arrays
+    for (int i = 0; i < n1; ++i)
+        leftArray[i] = actors[left + i];
+    for (int j = 0; j < n2; ++j)
+        rightArray[j] = actors[mid + 1 + j];
+
+    // Merge the arrays back into actors[left..right]
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (leftArray[i]->getName() <= rightArray[j]->getName())
+            actors[k++] = leftArray[i++];
+        else
+            actors[k++] = rightArray[j++];
     }
-    return largestIndex;
+
+    // Copy remaining elements
+    while (i < n1)
+        actors[k++] = leftArray[i++];
+    while (j < n2)
+        actors[k++] = rightArray[j++];
+
+    // Free temporary arrays
+    delete[] leftArray;
+    delete[] rightArray;
 }
 
-void selectionSort(Actor* array[], int n) {
-    for (int last = n - 1; last >= 1; last--) {
-        int largest = indexOfLargest(array, last + 1);
-        swap(array[largest], array[last]);
+void mergeSortActors(Actor** actors, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        // Sort first and second halves
+        mergeSortActors(actors, left, mid);
+        mergeSortActors(actors, mid + 1, right);
+
+        // Merge the sorted halves
+        mergeActors(actors, left, mid, right);
     }
 }
 
 Actor** Movie::getSortedActors(int& count) const {
-    // Step 1: Count the number of actors
+    // Count the number of actors
     count = 0;
-    ActorNode* currentNode = actorHead;
-    while (currentNode != nullptr) {
+    ActorNode* current = actorHead;
+    while (current != nullptr) {
         count++;
-        currentNode = currentNode->next;
+        current = current->next;
     }
 
-    // Step 2: Allocate an array to store actors
+    // Create an array to hold the actors
     Actor** actors = new Actor*[count];
-    currentNode = actorHead;
-    for (int i = 0; i < count; i++) {
-        actors[i] = currentNode->actor;
-        currentNode = currentNode->next;
+    current = actorHead;
+    for (int i = 0; i < count; ++i) {
+        actors[i] = current->actor;
+        current = current->next;
     }
 
-    // Step 3: Sort the actors using selection sort
-    selectionSort(actors, count);
+    // Apply merge sort
+    mergeSortActors(actors, 0, count - 1);
 
-    // Step 4: Return the sorted array
     return actors;
 }
