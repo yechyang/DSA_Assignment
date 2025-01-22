@@ -49,6 +49,9 @@ public:
 
     // Display movie details and their actors
     void display() const;
+
+    // Get sorted actors by name
+    Actor** getSortedActors(int& count) const;
 };
 
 #endif

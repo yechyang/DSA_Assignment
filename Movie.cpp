@@ -70,3 +70,50 @@ void Movie::display() const {
         current = current->next;
     }
 }
+
+void swap(Actor*& x, Actor*& y) {
+    Actor* temp = x;
+    x = y;
+    y = temp;
+}
+
+int indexOfLargest(Actor* array[], int n) {
+    int largestIndex = 0;
+    for (int i = 1; i < n; i++) {
+        if (array[i]->getName() > array[largestIndex]->getName()) {
+            largestIndex = i;
+        }
+    }
+    return largestIndex;
+}
+
+void selectionSort(Actor* array[], int n) {
+    for (int last = n - 1; last >= 1; last--) {
+        int largest = indexOfLargest(array, last + 1);
+        swap(array[largest], array[last]);
+    }
+}
+
+Actor** Movie::getSortedActors(int& count) const {
+    // Step 1: Count the number of actors
+    count = 0;
+    ActorNode* currentNode = actorHead;
+    while (currentNode != nullptr) {
+        count++;
+        currentNode = currentNode->next;
+    }
+
+    // Step 2: Allocate an array to store actors
+    Actor** actors = new Actor*[count];
+    currentNode = actorHead;
+    for (int i = 0; i < count; i++) {
+        actors[i] = currentNode->actor;
+        currentNode = currentNode->next;
+    }
+
+    // Step 3: Sort the actors using selection sort
+    selectionSort(actors, count);
+
+    // Step 4: Return the sorted array
+    return actors;
+}

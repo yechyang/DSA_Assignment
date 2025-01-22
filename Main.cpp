@@ -555,11 +555,24 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             cin >> movieId;
 
             Movie* movie = movieTable.search(movieId);
-            if (movie) {
-                movie->display();
-            } else {
+            if (!movie) {
                 cerr << "Error: Movie not found." << endl;
+                return;
             }
+
+            // Use the Movie's getSortedActors() method
+            int actorCount;
+            Actor** sortedActors = movie->getSortedActors(actorCount);
+
+            // Display sorted actors
+            cout << "Actors in the movie \"" << movie->getTitle() << "\" (sorted alphabetically):" << endl;
+            for (int i = 0; i < actorCount; i++) {
+                cout << "- ID: " << sortedActors[i]->getId()
+                    << ", Name: " << sortedActors[i]->getName() << endl;
+            }
+
+            // Free allocated memory
+            delete[] sortedActors;
         } else if (choice == 5) {
             int actorId;
             cout << "Enter Actor ID: ";
