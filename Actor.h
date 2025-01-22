@@ -21,6 +21,9 @@ private:
     int birthYear;         // Actor's birth year
     MovieNode* movieHead;  // Head of the linked list of movies
 
+    static void mergeSort(Actor** actors, int left, int right);
+    static void merge(Actor** actors, int left, int mid, int right);
+
 public:
     // Constructor
     Actor(const int& id = 0, const string& name = "", int birthYear = 0);
@@ -51,6 +54,8 @@ public:
 
     // Display actor details and their movies
     void display() const;
+
+    static Actor** filterAndSortByAge(Actor** allActors, int totalActors, int minAge, int maxAge, int& filteredCount);
 };
 
 #endif

@@ -144,3 +144,79 @@ Movie** Actor::getSortedMovies(int& count) const {
 
     return movies;
 }
+
+void Actor::merge(Actor** actors, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+
+    // Temporary arrays
+    Actor** leftArray = new Actor*[n1];
+    Actor** rightArray = new Actor*[n2];
+
+    // Copy data to temporary arrays
+    for (int i = 0; i < n1; ++i) {
+        leftArray[i] = actors[left + i];
+    }
+    for (int j = 0; j < n2; ++j) {
+        rightArray[j] = actors[mid + 1 + j];
+    }
+
+    // Merge the arrays back into actors[left..right]
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        int ageLeft = 2025 - leftArray[i]->getBirthYear();
+        int ageRight = 2025 - rightArray[j]->getBirthYear();
+
+        if (ageLeft <= ageRight) {
+            actors[k++] = leftArray[i++];
+        } else {
+            actors[k++] = rightArray[j++];
+        }
+    }
+
+    // Copy any remaining elements
+    while (i < n1) {
+        actors[k++] = leftArray[i++];
+    }
+    while (j < n2) {
+        actors[k++] = rightArray[j++];
+    }
+
+    // Free memory
+    delete[] leftArray;
+    delete[] rightArray;
+}
+
+// Merge sort function
+void Actor::mergeSort(Actor** actors, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        // Sort first and second halves
+        mergeSort(actors, left, mid);
+        mergeSort(actors, mid + 1, right);
+
+        // Merge the sorted halves
+        merge(actors, left, mid, right);
+    }
+}
+
+Actor** Actor::filterAndSortByAge(Actor** allActors, int totalActors, int minAge, int maxAge, int& filteredCount) {
+    filteredCount = 0;
+
+    // Temporary array for filtered actors
+    Actor** filteredActors = new Actor*[totalActors];
+
+    // Filter actors by age range
+    for (int i = 0; i < totalActors; ++i) {
+        int age = 2025 - allActors[i]->getBirthYear();
+        if (age >= minAge && age <= maxAge) {
+            filteredActors[filteredCount++] = allActors[i];
+        }
+    }
+
+    // Sort the filtered actors by age
+    mergeSort(filteredActors, 0, filteredCount - 1);
+
+    return filteredActors; // Return the filtered and sorted array
+}

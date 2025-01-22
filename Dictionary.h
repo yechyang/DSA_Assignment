@@ -83,6 +83,8 @@ public:
 
     // Display all key-value pairs
     void display(void (*displayFunc)(const T&)) const;
+    
+    int getSize() const { return size; }
 };
 
 #endif

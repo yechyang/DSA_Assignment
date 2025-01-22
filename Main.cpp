@@ -481,6 +481,15 @@ void saveCastToCSV(const string& filename, const Dictionary<Actor>& actorTable) 
     file.close();
     cout << "Cast relationships saved to " << filename << endl;
 }
+// Global variables for filtering logic
+Actor** allActors = nullptr;
+int totalActors = 0;
+
+// Standalone function to collect actors into an array
+void collectActors(const Actor& actor) {
+    allActors[totalActors++] = const_cast<Actor*>(&actor);
+}
+
 // Menu-driven application
 void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable) {
     int choice;
@@ -495,6 +504,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         cout << "6. Exit\n";
         cout << "7. Update actor details\n";
         cout << "8. Update movie details\n";
+        cout << "9. Display actors by age range\n";
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -642,6 +652,44 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             } else {
                 cerr << "Error: Movie not found." << endl;
             }
+        } else if (choice == 9) {
+            int minAge, maxAge;
+            cout << "Enter the minimum age (x): ";
+            cin >> minAge;
+            cout << "Enter the maximum age (y): ";
+            cin >> maxAge;
+
+            if (minAge > maxAge) {
+                cout << "Invalid range. Ensure that minimum age <= maximum age." << endl;
+                return;
+            }
+
+            // Collect all actors into a dynamic array
+            allActors = new Actor*[actorTable.getSize()];
+            totalActors = 0; // Reset total actor count
+
+            // Use the standalone function
+            actorTable.display(collectActors);
+            // Filter and sort actors by age range
+            int filteredCount = 0;
+            Actor** filteredActors = Actor::filterAndSortByAge(allActors, totalActors, minAge, maxAge, filteredCount);
+
+            // Display the filtered and sorted actors
+            if (filteredCount > 0) {
+                cout << "Actors with age between " << minAge << " and " << maxAge << " (sorted by age):" << endl;
+                for (int i = 0; i < filteredCount; ++i) {
+                    int age = 2025 - filteredActors[i]->getBirthYear();
+                    cout << "Actor ID: " << filteredActors[i]->getId()
+                        << ", Name: " << filteredActors[i]->getName()
+                        << ", Age: " << age << endl;
+                }
+            } else {
+                cout << "No actors found in the specified age range." << endl;
+            }
+
+            // Free allocated memory
+            delete[] allActors;
+            delete[] filteredActors;
         } else {
             cerr << "Invalid choice. Please try again." << endl;
         }
