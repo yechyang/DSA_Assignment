@@ -301,3 +301,7 @@ void Movie::sortMoviesByReleaseYear(Movie** movies, int count) {
 
     freeAVLTree(root);
 }
+
+ActorNode* Movie::getActorHead() const {
+    return actorHead;
+}

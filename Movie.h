@@ -66,6 +66,8 @@ public:
 
     // Sort movies using AVL tree
     static void sortMoviesByReleaseYear(Movie** movies, int count);
+
+    ActorNode* getActorHead() const;
 };
 
 #endif

@@ -1,5 +1,6 @@
 #include "Actor.h"
 #include "Movie.h"
+#include "Dictionary.h"
 #include <iostream>
 using namespace std;
 
@@ -252,4 +253,54 @@ Actor** Actor::filterAndSortByAge(Actor** allActors, int totalActors, int minAge
     mergeSort(filteredActors, 0, filteredCount - 1);
 
     return filteredActors; // Return the filtered and sorted array
+}
+
+void Actor::displayKnownActors() const {
+    const int maxActors = 1000; // Adjust as needed
+    Actor* knownActors[maxActors];
+    int knownCount = 0;
+
+    Dictionary<bool> processedActors(100); // Use Dictionary to track processed actors
+
+    // First-level connections
+    const MovieNode* movieNode = movieHead;
+    while (movieNode) {
+        Movie* movie = movieNode->movie;
+        const ActorNode* actorNode = movie->getActorHead();
+        while (actorNode) {
+            Actor* currentActor = actorNode->actor;
+            if (currentActor != this && !processedActors.search(currentActor->getId())) {
+                knownActors[knownCount++] = currentActor;
+                processedActors.insert(currentActor->getId(), true);
+            }
+            actorNode = actorNode->next;
+        }
+        movieNode = movieNode->next;
+    }
+
+    // Second-level connections
+    for (int i = 0; i < knownCount; ++i) {
+        Actor* level1Actor = knownActors[i];
+        const MovieNode* level1MovieNode = level1Actor->getMovies();
+        while (level1MovieNode) {
+            Movie* movie = level1MovieNode->movie;
+            const ActorNode* actorNode = movie->getActorHead();
+            while (actorNode) {
+                Actor* currentActor = actorNode->actor;
+                if (currentActor != this && !processedActors.search(currentActor->getId())) {
+                    knownActors[knownCount++] = currentActor;
+                    processedActors.insert(currentActor->getId(), true);
+                }
+                actorNode = actorNode->next;
+            }
+            level1MovieNode = level1MovieNode->next;
+        }
+    }
+
+    // Display known actors
+    cout << "Actors known by " << name << ":" << endl;
+    for (int i = 0; i < knownCount; ++i) {
+        cout << "- ID: " << knownActors[i]->getId()
+             << ", Name: " << knownActors[i]->getName() << endl;
+    }
 }

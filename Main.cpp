@@ -518,6 +518,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         cout << "8. Update movie details\n";
         cout << "9. Display actors by age range\n";
         cout << "10. Display Movies Within past 3 years\n";
+        cout << "11. Display a list of all actors that a particular actor knows.\n";
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -702,7 +703,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Free allocated memory
             delete[] allActors;
             delete[] filteredActors;
-        } else if (choice = 10) {
+        } else if (choice == 10) {
             // Allocate memory for recent movies
             recentMovies = new Movie*[movieTable.getSize()];
             movieCount = 0;
@@ -720,6 +721,17 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Free allocated memory
             delete[] recentMovies;
             recentMovies = nullptr;
+        } else if (choice == 11) {
+            int actorId;
+            cout << "Enter Actor ID: ";
+            cin >> actorId;
+
+            Actor* actor = actorTable.search(actorId);
+            if (actor) {
+                actor->displayKnownActors();
+            } else {
+                cerr << "Actor not found." << endl;
+            }
         } else {
             cerr << "Invalid choice. Please try again." << endl;
         }

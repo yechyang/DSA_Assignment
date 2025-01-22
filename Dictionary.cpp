@@ -1,9 +1,3 @@
-#include "Dictionary.h"
-#include <iostream>
-#include "Actor.h"
-#include "Movie.h"
-using namespace std;
-
 // // Constructor
 // Dictionary::Dictionary(int tableSize) : size(tableSize) {
 //     table = new Node*[size];
@@ -100,6 +94,8 @@ using namespace std;
 // }
 #include "Dictionary.h"
 #include <iostream>
+#include "Actor.h"
+#include "Movie.h"
 using namespace std;
 
 // Constructor
@@ -201,3 +197,4 @@ void Dictionary<T>::display(void (*displayFunc)(const T&)) const {
 // Explicit instantiation for specific types
 template class Dictionary<Actor>;
 template class Dictionary<Movie>;
+template class Dictionary<bool>;
