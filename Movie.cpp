@@ -1,5 +1,6 @@
 #include "Movie.h"
 #include "Actor.h"
+#include "MovieAVLNode.h"
 #include <iostream>
 using namespace std;
 
@@ -186,4 +187,117 @@ Actor** Movie::getSortedActors(int& count) const {
     mergeSortActors(actors, 0, count - 1);
 
     return actors;
+}
+
+// AVL Tree utility methods
+int Movie::getHeight(MovieAVLNode* node) {
+    return node ? node->height : 0;
+}
+
+int Movie::getBalance(MovieAVLNode* node) {
+    return node ? getHeight(node->left) - getHeight(node->right) : 0;
+}
+
+MovieAVLNode* Movie::rotateLeft(MovieAVLNode* x) {
+    MovieAVLNode* y = x->right;
+    MovieAVLNode* T2 = y->left;
+
+    y->left = x;
+    x->right = T2;
+
+    x->height = max(getHeight(x->left), getHeight(x->right)) + 1;
+    y->height = max(getHeight(y->left), getHeight(y->right)) + 1;
+
+    return y;
+}
+
+MovieAVLNode* Movie::rotateRight(MovieAVLNode* y) {
+    MovieAVLNode* x = y->left;
+    MovieAVLNode* T2 = x->right;
+
+    x->right = y;
+    y->left = T2;
+
+    y->height = max(getHeight(y->left), getHeight(y->right)) + 1;
+    x->height = max(getHeight(x->left), getHeight(x->right)) + 1;
+
+    return x;
+}
+
+MovieAVLNode* Movie::insertIntoAVL(MovieAVLNode* node, Movie* movie) {
+    if (!node) {
+        return new MovieAVLNode(movie); // Create a new node
+    }
+
+    if (movie->getReleaseYear() < node->releaseYear) {
+        node->left = insertIntoAVL(node->left, movie);
+    } else if (movie->getReleaseYear() > node->releaseYear) {
+        node->right = insertIntoAVL(node->right, movie);
+    } else {
+        // Duplicate year: Add movie to the linked list
+        MovieListNode* newNode = new MovieListNode(movie);
+        newNode->next = node->movieList;
+        node->movieList = newNode;
+        return node; // No need to adjust height or balance
+    }
+
+    // Update height
+    node->height = 1 + std::max(getHeight(node->left), getHeight(node->right));
+
+    // Check balance and perform rotations if needed
+    int balance = getBalance(node);
+
+    if (balance > 1 && movie->getReleaseYear() < node->left->releaseYear) {
+        return rotateRight(node);
+    }
+    if (balance < -1 && movie->getReleaseYear() > node->right->releaseYear) {
+        return rotateLeft(node);
+    }
+    if (balance > 1 && movie->getReleaseYear() > node->left->releaseYear) {
+        node->left = rotateLeft(node->left);
+        return rotateRight(node);
+    }
+    if (balance < -1 && movie->getReleaseYear() < node->right->releaseYear) {
+        node->right = rotateRight(node->right);
+        return rotateLeft(node);
+    }
+
+    return node;
+}
+
+void Movie::inOrderTraversal(MovieAVLNode* node) {
+    if (node) {
+        inOrderTraversal(node->left);
+        MovieListNode* current = node->movieList;
+        while (current) {
+            cout << "ID: " << current->movie->getId()
+                 << ", Movie: " << current->movie->getTitle()
+                 << ", Plot: " << current->movie->getPlot()
+                 << ", Year: " << node->releaseYear << endl;
+            current = current->next;
+        }
+        inOrderTraversal(node->right);
+    }
+}
+
+void Movie::freeAVLTree(MovieAVLNode* node) {
+    if (node) {
+        freeAVLTree(node->left);
+        freeAVLTree(node->right);
+        delete node;
+    }
+}
+
+// Sort movies using AVL tree
+void Movie::sortMoviesByReleaseYear(Movie** movies, int count) {
+    MovieAVLNode* root = nullptr;
+
+    for (int i = 0; i < count; ++i) {
+        root = insertIntoAVL(root, movies[i]);
+    }
+
+    cout << "Movies sorted by release year:" << endl;
+    inOrderTraversal(root);
+
+    freeAVLTree(root);
 }

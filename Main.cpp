@@ -490,6 +490,18 @@ void collectActors(const Actor& actor) {
     allActors[totalActors++] = const_cast<Actor*>(&actor);
 }
 
+// Global variables for movie collection
+Movie** recentMovies = nullptr;
+int movieCount = 0;
+int currentYear = 2025;
+
+// Free-standing function to filter movies
+void collectRecentMovies(const Movie& movie) {
+    if (movie.getReleaseYear() >= currentYear - 3) {
+        recentMovies[movieCount++] = const_cast<Movie*>(&movie);
+    }
+}
+
 // Menu-driven application
 void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable) {
     int choice;
@@ -505,6 +517,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         cout << "7. Update actor details\n";
         cout << "8. Update movie details\n";
         cout << "9. Display actors by age range\n";
+        cout << "10. Display Movies Within past 3 years\n";
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -689,6 +702,24 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Free allocated memory
             delete[] allActors;
             delete[] filteredActors;
+        } else if (choice = 10) {
+            // Allocate memory for recent movies
+            recentMovies = new Movie*[movieTable.getSize()];
+            movieCount = 0;
+
+            // Collect movies released in the past 3 years
+            movieTable.display(collectRecentMovies);
+
+            if (movieCount > 0) {
+                // Sort movies using AVL tree
+                Movie::sortMoviesByReleaseYear(recentMovies, movieCount);
+            } else {
+                cout << "No movies found from the past 3 years." << endl;
+            }
+
+            // Free allocated memory
+            delete[] recentMovies;
+            recentMovies = nullptr;
         } else {
             cerr << "Invalid choice. Please try again." << endl;
         }
