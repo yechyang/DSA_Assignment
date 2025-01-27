@@ -6,7 +6,7 @@ using namespace std;
 
 // Constructor
 Actor::Actor(const int& id, const string& name, int birthYear)
-    : id(id), name(name), birthYear(birthYear), movieHead(nullptr) {}
+    : id(id), name(name), birthYear(birthYear), movieHead(nullptr), rating(0.0f) {}
 
 // Destructor
 Actor::~Actor() {
@@ -22,11 +22,19 @@ Actor::~Actor() {
 int Actor::getId() const { return id; }
 string Actor::getName() const { return name; }
 int Actor::getBirthYear() const { return birthYear; }
+float Actor::getRating() const { return rating; }
 
 // Setter methods
 void Actor::setId(const int& id) { this->id = id; }
 void Actor::setName(const string& name) { this->name = name; }
 void Actor::setBirthYear(int birthYear) { this->birthYear = birthYear; }
+void Actor::setRating(float newRating) {
+    if (newRating >= 0.0f && newRating <= 10.0f) {
+        rating = newRating;
+    } else {
+        cerr << "Invalid rating. Please enter a value between 0.0 and 10.0." << endl;
+    }
+}
 
 // Add a movie to the actor's list
 void Actor::addMovie(Movie* movie) {
@@ -304,3 +312,19 @@ void Actor::displayKnownActors() const {
              << ", Name: " << knownActors[i]->getName() << endl;
     }
 }
+
+Actor** Actor::sortActorsByRating(Actor** actors, int count) const {
+    // Perform Bubble Sort (Descending Order by Rating)
+    for (int i = 0; i < count - 1; ++i) {
+        for (int j = 0; j < count - i - 1; ++j) {
+            if (actors[j]->getRating() < actors[j + 1]->getRating()) {
+                // Swap
+                Actor* temp = actors[j];
+                actors[j] = actors[j + 1];
+                actors[j + 1] = temp;
+            }
+        }
+    }
+    return actors; // Return the sorted array
+}
+

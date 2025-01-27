@@ -23,6 +23,7 @@ private:
     string plot;          // Movie plot
     int releaseYear;      // Release year of the movie
     ActorNode* actorHead; // Head of the linked list of actors
+    float rating; // Movie's rating
 
 public:
     // Constructor
@@ -36,12 +37,14 @@ public:
     string getTitle() const;
     string getPlot() const;
     int getReleaseYear() const;
+    float getRating() const;
 
     // Setter methods
     void setId(const int& id);
     void setTitle(const string& title);
     void setPlot(const string& plot);
     void setReleaseYear(int releaseYear);
+    void setRating(float newRating);
 
     // Add an actor to the movie's list
     void addActor(Actor* actor);
@@ -54,6 +57,8 @@ public:
 
     // Get sorted actors by name
     Actor** getSortedActors(int& count) const;
+
+    Movie** sortMoviesByRating(Movie** movies, int count) const;
 
     // AVL Tree utility methods (static)
     static int getHeight(MovieAVLNode* node);

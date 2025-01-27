@@ -519,6 +519,10 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         cout << "9. Display actors by age range\n";
         cout << "10. Display Movies Within past 3 years\n";
         cout << "11. Display a list of all actors that a particular actor knows.\n";
+        cout << "12. Update Actor Rating" << endl;
+        cout << "13. Update Movie Rating" << endl;
+        cout << "14. Display Actor By Rating" << endl;
+        cout << "15. Display Movie By Rating" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -732,6 +736,104 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             } else {
                 cerr << "Actor not found." << endl;
             }
+        }  else if (choice == 12) {
+                // Update actor rating
+                int actorId;
+                cout << "Enter Actor ID: ";
+                cin >> actorId;
+
+                Actor* actor = actorTable.search(actorId);
+                if (actor) {
+                    float newRating;
+                    cout << "Enter new rating (0.0 to 10.0): ";
+                    cin >> newRating;
+                    actor->setRating(newRating);
+                    cout << "Rating updated successfully!" << endl;
+                } else {
+                    cerr << "Actor not found." << endl;
+                }
+        } else if (choice == 13) {
+            // Update movie rating
+            int movieId;
+            cout << "Enter Movie ID: ";
+            cin >> movieId;
+
+            Movie* movie = movieTable.search(movieId);
+            if (movie) {
+                float newRating;
+                cout << "Enter new rating (0.0 to 10.0): ";
+                cin >> newRating;
+                movie->setRating(newRating);
+                cout << "Rating updated successfully!" << endl;
+            } else {
+                cerr << "Movie not found." << endl;
+            }
+       }else if (choice == 14) {
+            // Get the total number of actors
+            int actorCount = actorTable.getSize();
+            if (actorCount == 0) {
+                cout << "No actors available to display." << endl;
+                continue;
+            }
+
+            // Allocate memory for actors
+            Actor** actors = new Actor*[actorCount];
+            int index = 0;
+
+            // Collect actors from the hash table
+            for (int i = 0; i < actorTable.getSize(); ++i) {
+                Actor* currentActor = actorTable.search(i);
+                if (currentActor != nullptr) {
+                    actors[index++] = currentActor;
+                }
+            }
+
+            // Sort actors by rating using one actor instance
+            if (index > 0) { // Ensure there are actors to sort
+                actors[0]->sortActorsByRating(actors, index); // Use the first actor to call the method
+            }
+
+            // Display sorted actors
+            cout << "Actors sorted by rating (highest to lowest):" << endl;
+            for (int i = 0; i < index; ++i) {
+                cout << "- Name: " << actors[i]->getName()
+                    << ", Rating: " << actors[i]->getRating() << endl;
+            }
+
+            delete[] actors; // Free allocated memory
+        } else if (choice == 15) {
+            // Get the total number of movies
+            int movieCount = movieTable.getSize();
+            if (movieCount == 0) {
+                cout << "No movies available to display." << endl;
+                continue;
+            }
+
+            // Allocate memory for movies
+            Movie** movies = new Movie*[movieCount];
+            int index = 0;
+
+            // Collect movies from the hash table
+            for (int i = 0; i < movieTable.getSize(); ++i) {
+                Movie* currentMovie = movieTable.search(i);
+                if (currentMovie != nullptr) {
+                    movies[index++] = currentMovie;
+                }
+            }
+
+            // Sort movies by rating using one movie instance
+            if (index > 0) { // Ensure there are movies to sort
+                movies[0]->sortMoviesByRating(movies, index); // Use the first movie to call the method
+            }
+
+            // Display sorted movies
+            cout << "Movies sorted by rating (highest to lowest):" << endl;
+            for (int i = 0; i < index; ++i) {
+                cout << "- Title: " << movies[i]->getTitle()
+                    << ", Rating: " << movies[i]->getRating() << endl;
+            }
+
+            delete[] movies; // Free allocated memory
         } else {
             cerr << "Invalid choice. Please try again." << endl;
         }

@@ -20,6 +20,7 @@ private:
     string name;           // Actor's name
     int birthYear;         // Actor's birth year
     MovieNode* movieHead;  // Head of the linked list of movies
+    float rating; // Actor's rating
 
     static void mergeSort(Actor** actors, int left, int right);
     static void merge(Actor** actors, int left, int mid, int right);
@@ -37,11 +38,14 @@ public:
     int getId() const;
     string getName() const;
     int getBirthYear() const;
+    float getRating() const;
+
 
     // Setter methods
     void setId(const int& id);
     void setName(const string& name);
     void setBirthYear(int birthYear);
+    void setRating(float newRating);
 
     // Add a movie to the actor's list
     void addMovie(Movie* movie);
@@ -52,6 +56,8 @@ public:
     const MovieNode* getMovies() const;
     Movie** getSortedMovies(int& count) const;
 
+    Actor** sortActorsByRating(Actor** actors, int count) const;
+    
     // Display actor details and their movies
     void display() const;
 

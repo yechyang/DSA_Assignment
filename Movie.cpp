@@ -6,7 +6,7 @@ using namespace std;
 
 // Constructor
 Movie::Movie(const int& id, const string& title, const string& plot, int releaseYear)
-    : id(id), title(title), plot(plot), releaseYear(releaseYear), actorHead(nullptr) {}
+    : id(id), title(title), plot(plot), releaseYear(releaseYear), actorHead(nullptr), rating(0.0f) {}
 
 // Destructor
 Movie::~Movie() {
@@ -23,12 +23,21 @@ int Movie::getId() const { return id; }
 string Movie::getTitle() const { return title; }
 string Movie::getPlot() const { return plot; }
 int Movie::getReleaseYear() const { return releaseYear; }
+float Movie::getRating() const { return rating; }
+
 
 // Setter methods
 void Movie::setId(const int& id) { this->id = id; }
 void Movie::setTitle(const string& title) { this->title = title; }
 void Movie::setPlot(const string& plot) { this->plot = plot; }
 void Movie::setReleaseYear(int releaseYear) { this->releaseYear = releaseYear; }
+void Movie::setRating(float newRating) {
+    if (newRating >= 0.0f && newRating <= 10.0f) {
+        rating = newRating;
+    } else {
+        cerr << "Invalid rating. Please enter a value between 0.0 and 10.0." << endl;
+    }
+}
 
 // Add an actor to the movie's list
 void Movie::addActor(Actor* actor) {
@@ -304,4 +313,20 @@ void Movie::sortMoviesByReleaseYear(Movie** movies, int count) {
 
 ActorNode* Movie::getActorHead() const {
     return actorHead;
+}
+
+
+Movie** Movie::sortMoviesByRating(Movie** movies, int count) const {
+    // Perform Bubble Sort (Descending Order by Rating)
+    for (int i = 0; i < count - 1; ++i) {
+        for (int j = 0; j < count - i - 1; ++j) {
+            if (movies[j]->getRating() < movies[j + 1]->getRating()) {
+                // Swap
+                Movie* temp = movies[j];
+                movies[j] = movies[j + 1];
+                movies[j + 1] = temp;
+            }
+        }
+    }
+    return movies; // Return the sorted array
 }
