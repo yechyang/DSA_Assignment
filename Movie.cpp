@@ -315,13 +315,12 @@ ActorNode* Movie::getActorHead() const {
     return actorHead;
 }
 
-
 Movie** Movie::sortMoviesByRating(Movie** movies, int count) const {
     // Perform Bubble Sort (Descending Order by Rating)
     for (int i = 0; i < count - 1; ++i) {
         for (int j = 0; j < count - i - 1; ++j) {
             if (movies[j]->getRating() < movies[j + 1]->getRating()) {
-                // Swap
+                // Swap movies
                 Movie* temp = movies[j];
                 movies[j] = movies[j + 1];
                 movies[j + 1] = temp;

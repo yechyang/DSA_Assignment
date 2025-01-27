@@ -312,13 +312,12 @@ void Actor::displayKnownActors() const {
              << ", Name: " << knownActors[i]->getName() << endl;
     }
 }
-
 Actor** Actor::sortActorsByRating(Actor** actors, int count) const {
     // Perform Bubble Sort (Descending Order by Rating)
     for (int i = 0; i < count - 1; ++i) {
         for (int j = 0; j < count - i - 1; ++j) {
             if (actors[j]->getRating() < actors[j + 1]->getRating()) {
-                // Swap
+                // Swap actors
                 Actor* temp = actors[j];
                 actors[j] = actors[j + 1];
                 actors[j + 1] = temp;

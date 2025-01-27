@@ -56,8 +56,7 @@ public:
     const MovieNode* getMovies() const;
     Movie** getSortedMovies(int& count) const;
 
-    Actor** sortActorsByRating(Actor** actors, int count) const;
-    
+    Actor** sortActorsByRating(Actor** actors, int count) const;    
     // Display actor details and their movies
     void display() const;
 

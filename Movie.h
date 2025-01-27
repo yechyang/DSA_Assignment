@@ -59,7 +59,7 @@ public:
     Actor** getSortedActors(int& count) const;
 
     Movie** sortMoviesByRating(Movie** movies, int count) const;
-
+    
     // AVL Tree utility methods (static)
     static int getHeight(MovieAVLNode* node);
     static int getBalance(MovieAVLNode* node);
