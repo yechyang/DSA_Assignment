@@ -59,7 +59,12 @@ public:
     Actor** getSortedActors(int& count) const;
 
     Movie** sortMoviesByRating(Movie** movies, int count) const;
-    
+
+    void recommendMoviesByRating(Movie** movies, int totalMovies, float minRating) const;
+    void recommendMoviesByYear(Movie** movies, int totalMovies, int year) const;
+
+    void insertionSortMoviesByRating(Movie** movies, int count) const;
+
     // AVL Tree utility methods (static)
     static int getHeight(MovieAVLNode* node);
     static int getBalance(MovieAVLNode* node);

@@ -529,6 +529,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         cout << "13. Update Movie Rating" << endl;
         cout << "14. Display Actor By Rating" << endl;
         cout << "15. Display Movie By Rating" << endl;
+        cout << "16. Display Recommendations based on rating of Movie.\n";
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -822,7 +823,41 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
             delete[] recentMovies; // Free allocated memory
             recentMovies = nullptr;
-        }else {
+        } else if (choice == 16) {
+
+            int subChoice;
+            cout << "\nRecommendation Options:\n";
+            cout << "1. Recommend by Minimum Rating\n";
+            cout << "2. Recommend by Year\n";
+            cout << "Enter your choice: ";
+            cin >> subChoice;
+
+            recentMovies = new Movie*[movieTable.getSize()];
+            movieCount = 0;
+
+            movieTable.display(collectAllMovies);
+
+            Movie tempMovie;  // Temporary object to call the recommendation methods
+
+            if (subChoice == 1) {
+                float minRating;
+                cout << "Enter minimum movie rating: ";
+                cin >> minRating;
+                tempMovie.recommendMoviesByRating(recentMovies, movieCount, minRating);
+            } 
+            else if (subChoice == 2) {
+                int year;
+                cout << "Enter the year: ";
+                cin >> year;
+                tempMovie.recommendMoviesByYear(recentMovies, movieCount, year);
+            } 
+            else {
+                cout << "Invalid choice!" << endl;
+            }
+
+            delete[] recentMovies;  // Free allocated memory
+        } else if (choice == 17) {
+        } else {
             cerr << "Invalid choice. Please try again." << endl;
         }
     }

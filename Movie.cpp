@@ -329,3 +329,85 @@ Movie** Movie::sortMoviesByRating(Movie** movies, int count) const {
     }
     return movies; // Return the sorted array
 }
+
+// Insertion Sort for Movies by Rating
+void Movie::insertionSortMoviesByRating(Movie** movies, int count) const {
+    for (int i = 1; i < count; ++i) {
+        Movie* key = movies[i];
+        int j = i - 1;
+
+        while (j >= 0 && movies[j]->getRating() < key->getRating()) {
+            movies[j + 1] = movies[j];
+            j = j - 1;
+        }
+        movies[j + 1] = key;
+    }
+}
+
+void Movie::recommendMoviesByRating(Movie** movies, int totalMovies, float minRating) const {
+    cout << "\nMovies with rating higher than " << minRating << ":\n";
+    int count = 0;
+
+    for (int i = 0; i < totalMovies; ++i) {
+        if (movies[i]->getRating() >= minRating) {
+            count++;
+        }
+    }
+
+    if (count == 0) {
+        cout << "No movies found with the specified rating." << endl;
+        return;
+    }
+
+    Movie** filteredMovies = new Movie*[count];
+    int index = 0;
+    for (int i = 0; i < totalMovies; ++i) {
+        if (movies[i]->getRating() >= minRating) {
+            filteredMovies[index++] = movies[i];
+        }
+    }
+
+    insertionSortMoviesByRating(filteredMovies, count);
+
+    for (int i = 0; i < count; ++i) {
+        cout << "- " << filteredMovies[i]->getTitle() << " Rating: " << filteredMovies[i]->getRating() <<"/10\n";
+    }
+
+    delete[] filteredMovies;
+}
+
+void Movie::recommendMoviesByYear(Movie** movies, int totalMovies, int year) const {
+    cout << "\nMovies from the year " << year << ":\n";
+    int yearCount = 0;
+
+    // First, count movies from the specified year that also have a rating > 0
+    for (int i = 0; i < totalMovies; ++i) {
+        if (movies[i]->getReleaseYear() == year && movies[i]->getRating() > 0.0f) {
+            yearCount++;
+        }
+    }
+
+    if (yearCount == 0) {
+        cout << "No rated movies found from the specified year." << endl;
+        return;
+    }
+
+    // Store movies from the specified year that have a rating > 0
+    Movie** yearMovies = new Movie*[yearCount];
+    int index = 0;
+    for (int i = 0; i < totalMovies; ++i) {
+        if (movies[i]->getReleaseYear() == year && movies[i]->getRating() > 0.0f) {
+            yearMovies[index++] = movies[i];
+        }
+    }
+
+    // Sort using insertion sort
+    insertionSortMoviesByRating(yearMovies, yearCount);
+
+    // Display sorted movies
+    for (int i = 0; i < yearCount; ++i) {
+        cout << "- " << yearMovies[i]->getTitle() << " Rating: " << yearMovies[i]->getRating() <<"/10\n";
+    }
+
+    delete[] yearMovies;
+}
