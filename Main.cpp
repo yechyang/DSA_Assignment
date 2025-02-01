@@ -529,7 +529,8 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         cout << "13. Update Movie Rating" << endl;
         cout << "14. Display Actor By Rating" << endl;
         cout << "15. Display Movie By Rating" << endl;
-        cout << "16. Display Recommendations based on rating of Movie.\n";
+        cout << "16. Recommendations based on rating of Movie.\n";
+        cout << "17. Recommendations based on rating of Actor (with Movies).\n";
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -857,6 +858,17 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
             delete[] recentMovies;  // Free allocated memory
         } else if (choice == 17) {
+            float minRating;
+            cout << "Enter minimum actor rating: ";
+            cin >> minRating;
+
+            allActors = new Actor*[actorTable.getSize()];
+            totalActors = 0;
+
+            actorTable.display(collectActors); // Collect all actors into allActors array
+
+            Actor tempActor;  // Temporary object to call the method
+            tempActor.recommendActorsByRating(allActors, totalActors, minRating);
         } else {
             cerr << "Invalid choice. Please try again." << endl;
         }

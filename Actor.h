@@ -63,6 +63,8 @@ public:
     static Actor** filterAndSortByAge(Actor** allActors, int totalActors, int minAge, int maxAge, int& filteredCount);
 
     void displayKnownActors() const;
+
+    void recommendActorsByRating(Actor** actors, int totalActors, float minRating) const;
 };
 
 #endif

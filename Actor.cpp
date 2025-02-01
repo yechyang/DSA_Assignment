@@ -327,3 +327,31 @@ Actor** Actor::sortActorsByRating(Actor** actors, int count) const {
     return actors; // Return the sorted array
 }
 
+void Actor::recommendActorsByRating(Actor** actors, int totalActors, float minRating) const {
+    cout << "\nActors with rating higher than " << minRating << ":\n";
+    bool found = false;
+
+    for (int i = 0; i < totalActors; ++i) {
+        if (actors[i]->getRating() >= minRating) {
+            cout << "- " << actors[i]->getName() << " (Rating: " << actors[i]->getRating() << "/10)\n";
+            
+            // Display movies the actor is in
+            const MovieNode* movieNode = actors[i]->getMovies();
+            if (!movieNode) {
+                cout << "  No movies found for this actor.\n";
+            } else {
+                cout << "  Movies:\n";
+                while (movieNode) {
+                    cout << "    * " << movieNode->movie->getTitle() << " (Year: " << movieNode->movie->getReleaseYear() << " Rating: " << movieNode->movie->getRating() <<"/10)\n";
+                    movieNode = movieNode->next;
+                }
+                cout << endl;
+            }
+            found = true;
+        }
+    }
+
+    if (!found) {
+        cout << "No actors found with the specified rating.\n";
+    }
+}
