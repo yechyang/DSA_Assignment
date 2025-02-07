@@ -25,6 +25,9 @@ private:
     static void mergeSort(Actor** actors, int left, int right);
     static void merge(Actor** actors, int left, int mid, int right);
 
+    static void mergeByRating(Actor** actors, int left, int mid, int right);
+    static void mergeSortByRating(Actor** actors, int left, int right);
+
 public:
     // Constructor
     Actor(const int& id = 0, const string& name = "", int birthYear = 0);
