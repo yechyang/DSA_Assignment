@@ -34,6 +34,12 @@ public:
     // Search for a value by key
     T* search(const int& key) const;
 
+    // New search functions
+
+    // In Dictionary class declaration
+    T** searchByTitle(const string& name, int& matchCount);
+    T** searchByName(const string& name, int& matchCount);
+
     // Remove a key-value pair by key
     bool remove(const int& key);
 

@@ -64,6 +64,85 @@ T* Dictionary<T>::search(const int& key) const {
     }
     return nullptr;
 }
+// Manual trimming function (no STL)
+string trim(const string& str) {
+    int start = 0;
+    int end = str.length() - 1;
+
+    // Trim leading spaces
+    while (start <= end && (str[start] == ' ' || str[start] == '\t' || str[start] == '\n' || str[start] == '\r')) 
+        start++;
+    
+    // Trim trailing spaces
+    while (end >= start && (str[end] == ' ' || str[end] == '\t' || str[end] == '\n' || str[end] == '\r')) 
+        end--;
+
+    return str.substr(start, end - start + 1);
+}
+
+// Manual lowercase conversion (no STL)
+string toLower(const string& str) {
+    string lowerStr = "";
+    for (int i = 0; i < str.length(); ++i) {
+        char lowerChar = (str[i] >= 'A' && str[i] <= 'Z') ? (str[i] + 32) : str[i];
+        lowerStr += lowerChar;
+    }
+    return lowerStr;
+}
+
+template <>
+Movie** Dictionary<Movie>::searchByTitle(const string& name, int& matchCount) {
+    matchCount = 0;
+    Movie** matches = new Movie*[size];
+
+    string searchName = toLower(trim(name));  // Clean user input for comparison
+
+    for (int i = 0; i < size; ++i) {
+        Node<Movie>* current = table[i];
+        while (current != nullptr) {
+            // Compare lowercase, trimmed names but keep original for display
+            if (toLower(trim(current->value.getTitle())) == searchName) {
+                matches[matchCount++] = &(current->value);
+            }
+            current = current->next;
+        }
+    }
+
+    if (matchCount == 0) {
+        delete[] matches;
+        return nullptr;
+    }
+
+    return matches;
+}
+
+// Search for actors by name, allowing multiple matches
+template <>
+Actor** Dictionary<Actor>::searchByName(const string& name, int& matchCount) {
+    matchCount = 0;
+    Actor** matches = new Actor*[size];
+
+    string searchName = toLower(trim(name));  // Clean user input for comparison
+
+    for (int i = 0; i < size; ++i) {
+        Node<Actor>* current = table[i];
+        while (current != nullptr) {
+            // Compare lowercase, trimmed names but keep original for display
+            if (toLower(current->value.getName()) == searchName) {
+                matches[matchCount++] = &(current->value);
+            }
+            current = current->next;
+        }
+    }
+
+    if (matchCount == 0) {
+        delete[] matches;
+        return nullptr;
+    }
+
+    return matches;
+}
+
 
 // Remove a key-value pair
 template <typename T>

@@ -277,23 +277,26 @@ void loadActors(const string& filename, Dictionary<Actor>& actorTable) {
     while (getline(file, line)) {
         stringstream ss(line);
         getline(ss, id, ',');
-        getline(ss, name, ',');
+        getline(ss, name, ',');   // Name may have double quotes
         getline(ss, birthYear);
 
         int year = safeStoi(birthYear);
-        if (id.empty() || name.empty() || year == -1) {
-            cerr << "Skipping invalid actor record: " << line << endl;
-            continue;
-        }
         int intId = safeStoi(id);
-        if (intId == -1) {
+
+        if (intId == -1 || name.empty() || year == -1) {
             cerr << "Skipping invalid actor record: " << line << endl;
             continue;
         }
-        
-        Actor actor(intId, name, year);
-        actorTable.insert(intId, actor);
+
+        if (name.front() == '"' && name.back() == '"') {
+            name = name.substr(1, name.length() - 2);
+        }
+
+        cout << "Loaded Actor: [" << name << "]" << endl;
+
+        actorTable.insert(intId, Actor(intId, name, year));
     }
+
     file.close();
     cout << "Actors loaded from " << filename << endl;
 }
@@ -585,46 +588,91 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
                 cerr << "Error: Actor or Movie not found." << endl;
             }
         } else if (choice == 4) {
-            int movieId;
-            cout << "Enter Movie ID: ";
-            cin >> movieId;
+            string movieName;
+            cout << "Enter Movie name: ";
+            cin.ignore();
+            getline(cin, movieName);  // Use getline to capture full movie name
 
-            Movie* movie = movieTable.search(movieId);
-            if (!movie) {
+            int matchCount;
+            Movie** movies = movieTable.searchByTitle(movieName, matchCount);
+
+            if (!movies) {
                 cerr << "Error: Movie not found." << endl;
                 return;
             }
 
-            // Use the Movie's getSortedActors() method
-            int actorCount;
-            Actor** sortedActors = movie->getSortedActors(actorCount);
+            // Display matched movies
+            cout << "Movies found:" << endl;
+            for (int i = 0; i < matchCount; ++i) {
+                cout << i + 1 << ". " << movies[i]->getTitle() << " (Year: " << movies[i]->getReleaseYear() << ")" << endl;
+            }
 
-            // Display sorted actors
-            cout << "Actors in the movie \"" << movie->getTitle() << "\" (sorted alphabetically):" << endl;
+            // User selects a movie
+            int choice;
+            cout << "Enter the number of the movie you want: ";
+            cin >> choice;
+
+            if (choice < 1 || choice > matchCount) {
+                cerr << "Invalid selection." << endl;
+                delete[] movies;
+                return;
+            }
+
+            // Retrieve selected movie
+            Movie* selectedMovie = movies[choice - 1];
+            delete[] movies;  // Free allocated memory
+
+            // Get and display sorted actors in the selected movie
+            int actorCount;
+            Actor** sortedActors = selectedMovie->getSortedActors(actorCount);
+
+            cout << "Actors in the movie \"" << selectedMovie->getTitle() << "\" (sorted alphabetically):" << endl;
             for (int i = 0; i < actorCount; ++i) {
-                cout << "- ID: " << sortedActors[i]->getId()
-                    << ", Name: " << sortedActors[i]->getName() << endl;
+                cout << "- ID: " << sortedActors[i]->getId() << ", Name: " << sortedActors[i]->getName() << endl;
             }
 
             delete[] sortedActors; // Free allocated memory
         }
         else if (choice == 5) {
-            int actorId;
-            cout << "Enter Actor ID: ";
-            cin >> actorId;
+            string actorName;
+            cout << "Enter Actor name: ";
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ✅ Clears leftover input
+            getline(cin, actorName);  // Use getline to capture full actor name
 
-            Actor* actor = actorTable.search(actorId);
-            if (!actor) {
+            int matchCount;
+            Actor** actors = actorTable.searchByName(actorName, matchCount);
+
+            if (!actors) {
                 cerr << "Error: Actor not found." << endl;
                 return;
             }
 
-            // Use the Actor's getSortedMovies() method
-            int movieCount;
-            Movie** sortedMovies = actor->getSortedMovies(movieCount);
+            // Display matched actors
+            cout << "Actors found:" << endl;
+            for (int i = 0; i < matchCount; ++i) {
+                cout << i + 1 << ". " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
+            }
 
-            // Display sorted movies
-            cout << "Movies starring " << actor->getName() << " (sorted alphabetically):" << endl;
+            // User selects an actor
+            int choice;
+            cout << "Enter the number of the actor you want: ";
+            cin >> choice;
+
+            if (choice < 1 || choice > matchCount) {
+                cerr << "Invalid selection." << endl;
+                delete[] actors;
+                return;
+            }
+
+            // Retrieve selected actor
+            Actor* selectedActor = actors[choice - 1];
+            delete[] actors;  // Free allocated memory
+
+            // Get and display sorted movies for the selected actor
+            int movieCount;
+            Movie** sortedMovies = selectedActor->getSortedMovies(movieCount);
+
+            cout << "Movies starring " << selectedActor->getName() << " (sorted alphabetically):" << endl;
             for (int i = 0; i < movieCount; ++i) {
                 cout << "- Title: " << sortedMovies[i]->getTitle()
                     << ", Year: " << sortedMovies[i]->getReleaseYear() << endl;
@@ -877,7 +925,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
 // Main function
 int main() {
-    Dictionary<Actor> actorTable(100); // Actor hash table
+    Dictionary<Actor> actorTable(1000); // Actor hash table
     Dictionary<Movie> movieTable(100); // Movie hash table
 
     // Load data from CSV files
@@ -888,10 +936,10 @@ int main() {
     // Run the application
     runApplication(actorTable, movieTable);
 
-    // Save data back to CSV files
-    saveActorsToCSV("actors.csv", actorTable);
-    saveMoviesToCSV("movies.csv", movieTable);
-    saveCastToCSV("cast.csv", actorTable);
+    // // Save data back to CSV files
+    // saveActorsToCSV("actors.csv", actorTable);
+    // saveMoviesToCSV("movies.csv", movieTable);
+    // saveCastToCSV("cast.csv", actorTable);
 
     return 0;
 }
