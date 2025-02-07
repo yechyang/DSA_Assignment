@@ -28,6 +28,7 @@ float Actor::getRating() const { return rating; }
 void Actor::setId(const int& id) { this->id = id; }
 void Actor::setName(const string& name) { this->name = name; }
 void Actor::setBirthYear(int birthYear) { this->birthYear = birthYear; }
+// Time Complexity: O(1)
 void Actor::setRating(float newRating) {
     if (newRating >= 0.0f && newRating <= 10.0f) {
         rating = newRating;
@@ -70,53 +71,8 @@ void Actor::display() const {
     }
 }
 
-
-// void swap(Movie*& x, Movie*& y) {
-//     Movie* temp = x;
-//     x = y;
-//     y = temp;
-// }
-
-// int indexOfLargest(Movie* array[], int n) {
-//     int largestIndex = 0;
-//     for (int i = 1; i < n; i++) {
-//         if (array[i]->getTitle() > array[largestIndex]->getTitle()) {
-//             largestIndex = i;
-//         }
-//     }
-//     return largestIndex;
-// }
-
-// void selectionSort(Movie* array[], int n) {
-//     for (int last = n - 1; last >= 1; last--) {
-//         int largest = indexOfLargest(array, last + 1);
-//         swap(array[largest], array[last]);
-//     }
-// }
-
-// Movie** Actor::getSortedMovies(int& count) const {
-//     // Count the number of movies
-//     count = 0;
-//     MovieNode* currentNode = movieHead;
-//     while (currentNode != nullptr) {
-//         count++;
-//         currentNode = currentNode->next;
-//     }
-
-//     // Allocate an array to store movies
-//     Movie** movies = new Movie*[count];
-//     currentNode = movieHead;
-//     for (int i = 0; i < count; i++) {
-//         movies[i] = currentNode->movie;
-//         currentNode = currentNode->next;
-//     }
-
-//     // Sort the movies
-//     selectionSort(movies, count);
-
-//     return movies;
-// }
-
+// Time Complexity: O(n log n)
+// Space Complexity: O(n)
 void mergeMovies(Movie** movies, int left, int mid, int right) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
@@ -164,6 +120,8 @@ void mergeSortMovies(Movie** movies, int left, int right) {
     }
 }
 
+// Time Complexity: O(n log n)
+// Space Complexity: O(n)
 Movie** Actor::getSortedMovies(int& count) const {
     // Count the number of movies
     count = 0;
@@ -182,7 +140,7 @@ Movie** Actor::getSortedMovies(int& count) const {
     }
 
     // Apply merge sort
-    mergeSortMovies(movies, 0, count - 1);
+    mergeSortMovies(movies, 0, count - 1); // Time Complexity: O(n log n)
 
     return movies;
 }
@@ -243,11 +201,13 @@ void Actor::mergeSort(Actor** actors, int left, int right) {
     }
 }
 
+// Time Complexity: O(n log n)
+// Storage Complexity: O(n)
 Actor** Actor::filterAndSortByAge(Actor** allActors, int totalActors, int minAge, int maxAge, int& filteredCount) {
     filteredCount = 0;
 
     // Temporary array for filtered actors
-    Actor** filteredActors = new Actor*[totalActors];
+    Actor** filteredActors = new Actor*[totalActors]; // Space Complexity: O(n)
 
     // Filter actors by age range
     for (int i = 0; i < totalActors; ++i) {
@@ -258,11 +218,14 @@ Actor** Actor::filterAndSortByAge(Actor** allActors, int totalActors, int minAge
     }
 
     // Sort the filtered actors by age
-    mergeSort(filteredActors, 0, filteredCount - 1);
+    mergeSort(filteredActors, 0, filteredCount - 1); // Time Complexity: O(n log n)
 
     return filteredActors; // Return the filtered and sorted array
 }
 
+//
+// Change to ADT Queue
+//
 void Actor::displayKnownActors() const {
     const int maxActors = 1000; // Adjust as needed
     Actor* knownActors[maxActors];
@@ -312,6 +275,10 @@ void Actor::displayKnownActors() const {
              << ", Name: " << knownActors[i]->getName() << endl;
     }
 }
+
+//
+// Change to Merge Sort
+//
 Actor** Actor::sortActorsByRating(Actor** actors, int count) const {
     // Perform Bubble Sort (Descending Order by Rating)
     for (int i = 0; i < count - 1; ++i) {

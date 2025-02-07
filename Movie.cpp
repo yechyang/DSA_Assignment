@@ -31,6 +31,7 @@ void Movie::setId(const int& id) { this->id = id; }
 void Movie::setTitle(const string& title) { this->title = title; }
 void Movie::setPlot(const string& plot) { this->plot = plot; }
 void Movie::setReleaseYear(int releaseYear) { this->releaseYear = releaseYear; }
+// Time Complexity: O(1)
 void Movie::setRating(float newRating) {
     if (newRating >= 0.0f && newRating <= 10.0f) {
         rating = newRating;
@@ -175,6 +176,8 @@ void mergeSortActors(Actor** actors, int left, int right) {
     }
 }
 
+// Time Complexity: O(n log n)
+// Space Complexity: O(n)
 Actor** Movie::getSortedActors(int& count) const {
     // Count the number of actors
     count = 0;
@@ -193,7 +196,7 @@ Actor** Movie::getSortedActors(int& count) const {
     }
 
     // Apply merge sort
-    mergeSortActors(actors, 0, count - 1);
+    mergeSortActors(actors, 0, count - 1); // Time Complexity: O(n log n)
 
     return actors;
 }
@@ -274,6 +277,7 @@ MovieAVLNode* Movie::insertIntoAVL(MovieAVLNode* node, Movie* movie) {
     return node;
 }
 
+// Time Complexity: O(n)
 void Movie::inOrderTraversal(MovieAVLNode* node) {
     if (node) {
         inOrderTraversal(node->left);
@@ -289,6 +293,7 @@ void Movie::inOrderTraversal(MovieAVLNode* node) {
     }
 }
 
+// Time Complexity: O(n)
 void Movie::freeAVLTree(MovieAVLNode* node) {
     if (node) {
         freeAVLTree(node->left);
@@ -297,6 +302,8 @@ void Movie::freeAVLTree(MovieAVLNode* node) {
     }
 }
 
+// Time Complexity:  O(n log n)
+// Space Complexity: O(n)
 // Sort movies using AVL tree
 void Movie::sortMoviesByReleaseYear(Movie** movies, int count) {
     MovieAVLNode* root = nullptr;
@@ -306,7 +313,7 @@ void Movie::sortMoviesByReleaseYear(Movie** movies, int count) {
     }
 
     cout << "Movies sorted by release year:" << endl;
-    inOrderTraversal(root);
+    inOrderTraversal(root); // Time Complexity:  O(n log n)
 
     freeAVLTree(root);
 }
@@ -315,6 +322,9 @@ ActorNode* Movie::getActorHead() const {
     return actorHead;
 }
 
+//
+// Change to Merge Sort
+//
 Movie** Movie::sortMoviesByRating(Movie** movies, int count) const {
     // Perform Bubble Sort (Descending Order by Rating)
     for (int i = 0; i < count - 1; ++i) {
