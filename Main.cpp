@@ -599,16 +599,43 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             delete[] recentMovies;
             recentMovies = nullptr;
         } else if (choice == 11) {
-            int actorId;
-            cout << "Enter Actor ID: ";
-            cin >> actorId;
+            // Search for an actor by name instead of ID
+            string actorName;
+            cout << "Enter Actor Name: ";
+            cin.ignore();
+            getline(cin, actorName);
 
-            Actor* actor = actorTable.search(actorId);
-            if (actor) {
-                actor->displayKnownActors();
-            } else {
-                cerr << "Actor not found." << endl;
+            int matchCount;
+            Actor** actors = actorTable.searchByName(actorName, matchCount);
+
+            if (!actors) {
+                cerr << "Error: Actor not found." << endl;
+                return;
             }
+
+            // Display matched actors
+            cout << "\nActors found:\n";
+            for (int i = 0; i < matchCount; ++i) {
+                cout << "(" << i + 1 << ") " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
+            }
+
+            // User selects an actor
+            int choice;
+            cout << "Enter the number of the actor you want: ";
+            cin >> choice;
+
+            if (choice < 1 || choice > matchCount) {
+                cerr << "Invalid selection." << endl;
+                delete[] actors;
+                return;
+            }
+
+            // Retrieve selected actor
+            Actor* selectedActor = actors[choice - 1];
+            delete[] actors;  // Free allocated memory
+
+            // Display known actors
+            selectedActor->displayKnownActors();
         }  else if (choice == 12) {
             // Update actor rating using actor name search
             string actorName;
