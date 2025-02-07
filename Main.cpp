@@ -793,37 +793,91 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
                 cerr << "Actor not found." << endl;
             }
         }  else if (choice == 12) {
-                // Update actor rating
-                int actorId;
-                cout << "\nEnter Actor ID: ";
-                cin >> actorId;
+            // Update actor rating using actor name search
+            string actorName;
+            cout << "\nEnter Actor Name: ";
+            cin.ignore();  // Clear input buffer
+            getline(cin, actorName);  // Allow full actor name input
 
-                Actor* actor = actorTable.search(actorId);
-                if (actor) {
-                    float newRating;
-                    cout << "Enter new rating (0.0 to 10.0): ";
-                    cin >> newRating;
-                    actor->setRating(newRating);
-                    cout << "\nRating updated successfully!" << endl;
-                } else {
-                    cerr << "Actor not found." << endl;
-                }
-        } else if (choice == 13) {
-            // Update movie rating
-            int movieId;
-            cout << "\nEnter Movie ID: ";
-            cin >> movieId;
+            int matchCount;
+            Actor** actors = actorTable.searchByName(actorName, matchCount);
 
-            Movie* movie = movieTable.search(movieId);
-            if (movie) {
-                float newRating;
-                cout << "Enter new rating (0.0 to 10.0): ";
-                cin >> newRating;
-                movie->setRating(newRating);
-                cout << "\nRating updated successfully!" << endl;
-            } else {
-                cerr << "Movie not found." << endl;
+            if (!actors) {
+                cerr << "Error: Actor not found." << endl;
+                return;
             }
+
+            // Display matched actors
+            cout << "\nActors found:\n";
+            for (int i = 0; i < matchCount; ++i) {
+                cout << i + 1 << ". " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
+            }
+
+            // Let user pick an actor from the list
+            int choice;
+            cout << "Enter the number of the actor you want to update: ";
+            cin >> choice;
+
+            if (choice < 1 || choice > matchCount) {
+                cerr << "Invalid selection." << endl;
+                delete[] actors;
+                return;
+            }
+
+            // Retrieve selected actor
+            Actor* selectedActor = actors[choice - 1];
+            delete[] actors;  // Free allocated memory
+
+            // Ask for new rating
+            float newRating;
+            cout << "Enter new rating (0.0 to 10.0): ";
+            cin >> newRating;
+            selectedActor->setRating(newRating);
+
+            cout << "\nRating updated successfully for " << selectedActor->getName() << "!" << endl;
+        } else if (choice == 13) {
+            // Update movie rating using movie title search
+            string movieTitle;
+            cout << "\nEnter Movie Title: ";
+            cin.ignore();  // Clear input buffer
+            getline(cin, movieTitle);  // Allow full movie title input
+
+            int matchCount;
+            Movie** movies = movieTable.searchByTitle(movieTitle, matchCount);
+
+            if (!movies) {
+                cerr << "Error: Movie not found." << endl;
+                return;
+            }
+
+            // Display matched movies
+            cout << "\nMovies found:\n";
+            for (int i = 0; i < matchCount; ++i) {
+                cout << i + 1 << ". " << movies[i]->getTitle() << " (Year: " << movies[i]->getReleaseYear() << ")" << endl;
+            }
+
+            // Let user pick a movie from the list
+            int choice;
+            cout << "Enter the number of the movie you want to update: ";
+            cin >> choice;
+
+            if (choice < 1 || choice > matchCount) {
+                cerr << "Invalid selection." << endl;
+                delete[] movies;
+                return;
+            }
+
+            // Retrieve selected movie
+            Movie* selectedMovie = movies[choice - 1];
+            delete[] movies;  // Free allocated memory
+
+            // Ask for new rating
+            float newRating;
+            cout << "Enter new rating (0.0 to 10.0): ";
+            cin >> newRating;
+            selectedMovie->setRating(newRating);
+
+            cout << "\nRating updated successfully for \"" << selectedMovie->getTitle() << "\"!" << endl;
         } else if (choice == 14) {
             // Collect all actors from the hash table
             allActors = new Actor*[actorTable.getSize()];
