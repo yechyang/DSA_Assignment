@@ -271,7 +271,8 @@ void Actor::displayKnownActors() const {
     Actor* knownActors[maxActors];
     int knownCount = 0;
 
-    Dictionary<bool> processedActors(100); // Use Dictionary to track processed actors
+    Dictionary<bool> processedActors(100); // Track processed actors
+    Dictionary<bool> level1Actors(100); // Track level-1 actors separately
 
     // First-level connections
     const MovieNode* movieNode = movieHead;
@@ -283,15 +284,18 @@ void Actor::displayKnownActors() const {
             if (currentActor != this && !processedActors.search(currentActor->getId())) {
                 knownActors[knownCount++] = currentActor;
                 processedActors.insert(currentActor->getId(), true);
+                level1Actors.insert(currentActor->getId(), true); // Mark as level-1
             }
             actorNode = actorNode->next;
         }
         movieNode = movieNode->next;
     }
 
-    // Second-level connections
+    // Second-level connections (only for level-1 actors)
     for (int i = 0; i < knownCount; ++i) {
         Actor* level1Actor = knownActors[i];
+        if (!level1Actors.search(level1Actor->getId())) continue; // Ensure only level-1 actors expand
+
         const MovieNode* level1MovieNode = level1Actor->getMovies();
         while (level1MovieNode) {
             Movie* movie = level1MovieNode->movie;
@@ -302,7 +306,7 @@ void Actor::displayKnownActors() const {
                     knownActors[knownCount++] = currentActor;
                     processedActors.insert(currentActor->getId(), true);
                 }
-                actorNode = actorNode->next;
+            actorNode = actorNode->next;
             }
             level1MovieNode = level1MovieNode->next;
         }
