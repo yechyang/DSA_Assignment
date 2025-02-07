@@ -83,55 +83,94 @@ void Movie::display() const {
 }
 
 
-void mergeActors(Actor** actors, int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
+// void mergeActors(Actor** actors, int left, int mid, int right) {
+//     int n1 = mid - left + 1;
+//     int n2 = right - mid;
 
-    // Temporary arrays
-    Actor** leftArray = new Actor*[n1];
-    Actor** rightArray = new Actor*[n2];
+//     // Temporary arrays
+//     Actor** leftArray = new Actor*[n1];
+//     Actor** rightArray = new Actor*[n2];
 
-    // Copy data to temporary arrays
-    for (int i = 0; i < n1; ++i)
-        leftArray[i] = actors[left + i];
-    for (int j = 0; j < n2; ++j)
-        rightArray[j] = actors[mid + 1 + j];
+//     // Copy data to temporary arrays
+//     for (int i = 0; i < n1; ++i)
+//         leftArray[i] = actors[left + i];
+//     for (int j = 0; j < n2; ++j)
+//         rightArray[j] = actors[mid + 1 + j];
 
-    // Merge the arrays back into actors[left..right]
-    int i = 0, j = 0, k = left;
-    while (i < n1 && j < n2) {
-        if (leftArray[i]->getName() <= rightArray[j]->getName())
-            actors[k++] = leftArray[i++];
-        else
-            actors[k++] = rightArray[j++];
+//     // Merge the arrays back into actors[left..right]
+//     int i = 0, j = 0, k = left;
+//     while (i < n1 && j < n2) {
+//         if (leftArray[i]->getName() <= rightArray[j]->getName())
+//             actors[k++] = leftArray[i++];
+//         else
+//             actors[k++] = rightArray[j++];
+//     }
+
+//     // Copy remaining elements
+//     while (i < n1)
+//         actors[k++] = leftArray[i++];
+//     while (j < n2)
+//         actors[k++] = rightArray[j++];
+
+//     // Free temporary arrays
+//     delete[] leftArray;
+//     delete[] rightArray;
+// }
+
+// void mergeSortActors(Actor** actors, int left, int right) {
+//     if (left < right) {
+//         int mid = left + (right - left) / 2;
+
+//         // Sort first and second halves
+//         mergeSortActors(actors, left, mid);
+//         mergeSortActors(actors, mid + 1, right);
+
+//         // Merge the sorted halves
+//         mergeActors(actors, left, mid, right);
+//     }
+// }
+
+// // Time Complexity: O(n log n)
+// // Space Complexity: O(n)
+// Actor** Movie::getSortedActors(int& count) const {
+//     // Count the number of actors
+//     count = 0;
+//     ActorNode* current = actorHead;
+//     while (current != nullptr) {
+//         count++;
+//         current = current->next;
+//     }
+
+//     // Create an array to hold the actors
+//     Actor** actors = new Actor*[count];
+//     current = actorHead;
+//     for (int i = 0; i < count; ++i) {
+//         actors[i] = current->actor;
+//         current = current->next;
+//     }
+
+//     // Apply merge sort
+//     mergeSortActors(actors, 0, count - 1); // Time Complexity: O(n log n)
+
+//     return actors;
+// }
+
+// Insertion Sort for Sorting Actors by Name
+void insertionSortActors(Actor** actors, int count) {
+    for (int i = 1; i < count; ++i) {
+        Actor* key = actors[i];
+        int j = i - 1;
+
+        // Move elements that are greater than `key` forward
+        while (j >= 0 && actors[j]->getName() > key->getName()) {
+            actors[j + 1] = actors[j];
+            j--;
+        }
+        actors[j + 1] = key;
     }
-
-    // Copy remaining elements
-    while (i < n1)
-        actors[k++] = leftArray[i++];
-    while (j < n2)
-        actors[k++] = rightArray[j++];
-
-    // Free temporary arrays
-    delete[] leftArray;
-    delete[] rightArray;
 }
 
-void mergeSortActors(Actor** actors, int left, int right) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
-
-        // Sort first and second halves
-        mergeSortActors(actors, left, mid);
-        mergeSortActors(actors, mid + 1, right);
-
-        // Merge the sorted halves
-        mergeActors(actors, left, mid, right);
-    }
-}
-
-// Time Complexity: O(n log n)
-// Space Complexity: O(n)
+// **Updated Sorting Function Using Insertion Sort**
 Actor** Movie::getSortedActors(int& count) const {
     // Count the number of actors
     count = 0;
@@ -149,8 +188,8 @@ Actor** Movie::getSortedActors(int& count) const {
         current = current->next;
     }
 
-    // Apply merge sort
-    mergeSortActors(actors, 0, count - 1); // Time Complexity: O(n log n)
+    // **Use Insertion Sort (Better for Small Data Sets)**
+    insertionSortActors(actors, count); // O(n^2) worst case, O(n) best case
 
     return actors;
 }

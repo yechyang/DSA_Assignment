@@ -71,57 +71,97 @@ void Actor::display() const {
     }
 }
 
-// Time Complexity: O(n log n)
-// Space Complexity: O(n)
-void mergeMovies(Movie** movies, int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
+// // Time Complexity: O(n log n)
+// // Space Complexity: O(n)
+// void mergeMovies(Movie** movies, int left, int mid, int right) {
+//     int n1 = mid - left + 1;
+//     int n2 = right - mid;
 
-    // Temporary arrays
-    Movie** leftArray = new Movie*[n1];
-    Movie** rightArray = new Movie*[n2];
+//     // Temporary arrays
+//     Movie** leftArray = new Movie*[n1];
+//     Movie** rightArray = new Movie*[n2];
 
-    // Copy data to temporary arrays
-    for (int i = 0; i < n1; ++i)
-        leftArray[i] = movies[left + i];
-    for (int j = 0; j < n2; ++j)
-        rightArray[j] = movies[mid + 1 + j];
+//     // Copy data to temporary arrays
+//     for (int i = 0; i < n1; ++i)
+//         leftArray[i] = movies[left + i];
+//     for (int j = 0; j < n2; ++j)
+//         rightArray[j] = movies[mid + 1 + j];
 
-    // Merge the arrays back into movies[left..right]
-    int i = 0, j = 0, k = left;
-    while (i < n1 && j < n2) {
-        if (leftArray[i]->getTitle() <= rightArray[j]->getTitle())
-            movies[k++] = leftArray[i++];
-        else
-            movies[k++] = rightArray[j++];
+//     // Merge the arrays back into movies[left..right]
+//     int i = 0, j = 0, k = left;
+//     while (i < n1 && j < n2) {
+//         if (leftArray[i]->getTitle() <= rightArray[j]->getTitle())
+//             movies[k++] = leftArray[i++];
+//         else
+//             movies[k++] = rightArray[j++];
+//     }
+
+//     // Copy remaining elements
+//     while (i < n1)
+//         movies[k++] = leftArray[i++];
+//     while (j < n2)
+//         movies[k++] = rightArray[j++];
+
+//     // Free temporary arrays
+//     delete[] leftArray;
+//     delete[] rightArray;
+// }
+
+// void mergeSortMovies(Movie** movies, int left, int right) {
+//     if (left < right) {
+//         int mid = left + (right - left) / 2;
+
+//         // Sort first and second halves
+//         mergeSortMovies(movies, left, mid);
+//         mergeSortMovies(movies, mid + 1, right);
+
+//         // Merge the sorted halves
+//         mergeMovies(movies, left, mid, right);
+//     }
+// }
+
+// // Time Complexity: O(n log n)
+// // Space Complexity: O(n)
+// Movie** Actor::getSortedMovies(int& count) const {
+//     // Count the number of movies
+//     count = 0;
+//     MovieNode* current = movieHead;
+//     while (current != nullptr) {
+//         count++;
+//         current = current->next;
+//     }
+
+//     // Create an array to hold the movies
+//     Movie** movies = new Movie*[count];
+//     current = movieHead;
+//     for (int i = 0; i < count; ++i) {
+//         movies[i] = current->movie;
+//         current = current->next;
+//     }
+
+//     // Apply merge sort
+//     mergeSortMovies(movies, 0, count - 1); // Time Complexity: O(n log n)
+
+//     return movies;
+// }
+
+
+// Insertion Sort for Sorting Movies by Title
+void insertionSortMovies(Movie** movies, int count) {
+    for (int i = 1; i < count; ++i) {
+        Movie* key = movies[i];
+        int j = i - 1;
+
+        // Move elements that are greater than `key` forward
+        while (j >= 0 && movies[j]->getTitle() > key->getTitle()) {
+            movies[j + 1] = movies[j];
+            j--;
+        }
+        movies[j + 1] = key;
     }
-
-    // Copy remaining elements
-    while (i < n1)
-        movies[k++] = leftArray[i++];
-    while (j < n2)
-        movies[k++] = rightArray[j++];
-
-    // Free temporary arrays
-    delete[] leftArray;
-    delete[] rightArray;
 }
 
-void mergeSortMovies(Movie** movies, int left, int right) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
-
-        // Sort first and second halves
-        mergeSortMovies(movies, left, mid);
-        mergeSortMovies(movies, mid + 1, right);
-
-        // Merge the sorted halves
-        mergeMovies(movies, left, mid, right);
-    }
-}
-
-// Time Complexity: O(n log n)
-// Space Complexity: O(n)
+// **Updated Sorting Function Using Insertion Sort**
 Movie** Actor::getSortedMovies(int& count) const {
     // Count the number of movies
     count = 0;
@@ -139,8 +179,8 @@ Movie** Actor::getSortedMovies(int& count) const {
         current = current->next;
     }
 
-    // Apply merge sort
-    mergeSortMovies(movies, 0, count - 1); // Time Complexity: O(n log n)
+    // **Use Insertion Sort (Better for Small Data Sets)**
+    insertionSortMovies(movies, count); // O(n^2) worst case, O(n) best case
 
     return movies;
 }

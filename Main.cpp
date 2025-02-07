@@ -395,7 +395,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         else if (choice == 5) {
             string actorName;
             cout << "Enter Actor name: ";
-            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ✅ Clears leftover input
+            cin.ignore();
             getline(cin, actorName);  // Use getline to capture full actor name
 
             int matchCount;
@@ -823,7 +823,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
 // Main function
 int main() {
-    Dictionary<Actor> actorTable(1000); // Actor hash table
+    Dictionary<Actor> actorTable(100); // Actor hash table
     Dictionary<Movie> movieTable(100); // Movie hash table
 
     // Load data from CSV files
