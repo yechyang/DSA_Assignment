@@ -536,7 +536,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         cout << "17. Recommendations based on rating of Actor (with Movies).\n";
         cout << "Enter your choice: ";
         cin >> choice;
-
+        cout << endl;
         if (choice == 1) {
             // Add new actor
             int id;
