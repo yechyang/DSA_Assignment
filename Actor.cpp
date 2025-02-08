@@ -39,10 +39,24 @@ void Actor::setRating(float newRating) {
 
 // Add a movie to the actor's list
 void Actor::addMovie(Movie* movie) {
+    if (!movie) return;
+
+    // ✅ Prevent duplicates
+    MovieNode* current = movieHead;
+    while (current) {
+        if (current->movie == movie) return;  // Already linked, no need to re-add
+        current = current->next;
+    }
+
+    // ✅ Append instead of overwrite
     MovieNode* newNode = new MovieNode(movie);
     newNode->next = movieHead;
     movieHead = newNode;
+
+    cout << "[Debug] Added Movie to Actor: " << name << " -> " 
+         << movie->getTitle() << " (ID: " << movie->getId() << ")" << endl;
 }
+
 
 // New method to return the head of the movie list
 const MovieNode* Actor::getMovies() const {
@@ -357,7 +371,7 @@ void Actor::displayKnownActors() const {
                     knownActors[knownCount++] = currentActor;
                     processedActors.insert(currentActor->getId(), true);
                 }
-            actorNode = actorNode->next;
+                actorNode = actorNode->next;
             }
             level1MovieNode = level1MovieNode->next;
         }

@@ -65,18 +65,6 @@ public:
 
     void insertionSortMoviesByRating(Movie** movies, int count) const;
 
-    // AVL Tree utility methods (static)
-    static int getHeight(MovieAVLNode* node);
-    static int getBalance(MovieAVLNode* node);
-    static MovieAVLNode* rotateLeft(MovieAVLNode* x);
-    static MovieAVLNode* rotateRight(MovieAVLNode* y);
-    static MovieAVLNode* insertIntoAVL(MovieAVLNode* node, Movie* movie);
-    static void inOrderTraversal(MovieAVLNode* node);
-    static void freeAVLTree(MovieAVLNode* node);
-
-    // Sort movies using AVL tree
-    static void sortMoviesByReleaseYear(Movie** movies, int count);
-
     ActorNode* getActorHead() const;
 };
 
