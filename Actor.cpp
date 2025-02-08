@@ -322,8 +322,8 @@ void Actor::displayKnownActors() const {
     Actor* knownActors[maxActors];
     int knownCount = 0;
 
-    Dictionary<bool> processedActors(100); // Track processed actors
-    Dictionary<bool> level1Actors(100); // Track level-1 actors separately
+    Dictionary<bool> processedActors; // Track processed actors
+    Dictionary<bool> level1Actors; // Track level-1 actors separately
 
     // First-level connections
     const MovieNode* movieNode = movieHead;

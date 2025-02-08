@@ -6,7 +6,7 @@ using namespace std;
 
 // Constructor
 template <typename T>
-Dictionary<T>::Dictionary(int tableSize) : size(tableSize) {
+Dictionary<T>::Dictionary(int initialSize) : size(initialSize), numElements(0) {
     table = new Node<T>*[size];
     for (int i = 0; i < size; ++i) {
         table[i] = nullptr;
@@ -33,9 +33,13 @@ int Dictionary<T>::hashFunction(const int& key) const {
     return key % size;
 }
 
-// Insert a key-value pair
+// Insert with dynamic resizing
 template <typename T>
 void Dictionary<T>::insert(const int& key, const T& value) {
+    if ((numElements / (float)size) > 0.7) { // Load factor > 70%
+        resize();
+    }
+
     int index = hashFunction(key);
     Node<T>* newNode = new Node<T>(key, value);
 
@@ -48,6 +52,39 @@ void Dictionary<T>::insert(const int& key, const T& value) {
         }
         current->next = newNode;
     }
+    numElements++;  // Increase element count
+}
+
+// Resize the dictionary when load factor is too high
+template <typename T>
+void Dictionary<T>::resize() {
+    int newCapacity = size * 2; // Double the size
+    Node<T>** newTable = new Node<T>*[newCapacity];
+
+    for (int i = 0; i < newCapacity; ++i) {
+        newTable[i] = nullptr;
+    }
+
+    // Rehash all elements
+    for (int i = 0; i < size; ++i) {
+        Node<T>* current = table[i];
+        while (current) {
+            Node<T>* temp = current;
+            current = current->next;
+
+            // Compute new index
+            int newIndex = temp->key % newCapacity;
+            temp->next = newTable[newIndex];
+            newTable[newIndex] = temp;
+        }
+    }
+
+    // Replace old table
+    delete[] table;
+    table = newTable;
+    size = newCapacity;
+
+    cout << "Resized dictionary to " << size << " buckets.\n";
 }
 
 // Search for a value by key

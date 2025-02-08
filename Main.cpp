@@ -821,8 +821,8 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
 // Main function
 int main() {
-    Dictionary<Actor> actorTable(100); // Actor hash table
-    Dictionary<Movie> movieTable(100); // Movie hash table
+    Dictionary<Actor> actorTable; // Actor hash table
+    Dictionary<Movie> movieTable; // Movie hash table
 
     AVLTree<Actor> actorTree([](Actor* actor) {
         return (2025 - actor->getBirthYear()) * 1000000 + actor->getId();

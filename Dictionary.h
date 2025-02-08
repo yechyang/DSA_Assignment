@@ -20,12 +20,14 @@ class Dictionary {
 private:
     Node<T>** table; // Array of pointers to Node (buckets)
     int size;        // Size of the hash table
+    int numElements;
 
     // Hash function to compute an index
     int hashFunction(const int& key) const;
+    void resize();
 
 public:
-    Dictionary(int tableSize);   // Constructor
+    Dictionary(int initialSize = 10);   // Constructor
     ~Dictionary();               // Destructor
 
     // Add a key-value pair to the dictionary
