@@ -63,7 +63,7 @@ public:
     // Display actor details and their movies
     void display() const;
 
-    static Actor** filterAndSortByAge(Actor** allActors, int totalActors, int minAge, int maxAge, int& filteredCount);
+    // void sortActorsByAge(Actor** allActors, int totalActors, int minAge, int maxAge, int& filteredCount);
 
     void displayKnownActors() const;
 

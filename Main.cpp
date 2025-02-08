@@ -2,8 +2,10 @@
 #include <fstream>
 #include <sstream>
 #include "Dictionary.h"
+#include "AVLTree.h"
 #include "Actor.h"
 #include "Movie.h"
+#include <ctime>
 
 using namespace std;
 
@@ -23,7 +25,7 @@ void skipHeader(ifstream& file) {
 }
 
 // Function to load actors from a CSV file
-void loadActors(const string& filename, Dictionary<Actor>& actorTable) {
+void loadActors(const string& filename, Dictionary<Actor>& actorTable,AVLTree<Actor>& actorTree) {
     ifstream file(filename);
     if (!file.is_open()) {
         cerr << "Error opening " << filename << endl;
@@ -54,6 +56,10 @@ void loadActors(const string& filename, Dictionary<Actor>& actorTable) {
         cout << "Loaded Actor: [" << name << "]" << endl;
 
         actorTable.insert(intId, Actor(intId, name, year));
+        Actor* actorPtr = actorTable.search(intId);
+        if (actorPtr) {
+            actorTree.insert(actorPtr);
+        }
     }
 
     file.close();
@@ -61,7 +67,7 @@ void loadActors(const string& filename, Dictionary<Actor>& actorTable) {
 }
 
 // Function to load movies from a CSV file
-void loadMovies(const string& filename, Dictionary<Movie>& movieTable) {
+void loadMovies(const string& filename, Dictionary<Movie>& movieTable,AVLTree<Movie>& movieTree) {
     ifstream file(filename);
     if (!file.is_open()) {
         cerr << "Error opening " << filename << endl;
@@ -91,6 +97,13 @@ void loadMovies(const string& filename, Dictionary<Movie>& movieTable) {
 
         Movie movie(intId, title, plot, year);
         movieTable.insert(intId, movie);
+
+        std::cout << "Loading Movie: " << title << " (" << year << ")" << std::endl;
+
+        Movie* moviePtr = movieTable.search(intId);
+        if (moviePtr) {
+            movieTree.insert(moviePtr);
+        }
     }
     file.close();
     cout << "Movies loaded from " << filename << endl;
@@ -271,7 +284,7 @@ void collectRecentMovies(const Movie& movie) {
 
 
 // Menu-driven application
-void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable) {
+void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable, AVLTree<Actor>& actorTree, AVLTree<Movie>& movieTree) {
     int choice;
 
     while (true) {
@@ -311,6 +324,14 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             Actor actor(id, name, birthYear);
             actorTable.insert(id, actor);
             cout << "Actor added successfully!" << endl;
+            Actor* actorPtr = actorTable.search(id);
+
+            if (actorPtr) {
+                actorTree.insert(actorPtr);
+                cout << "Actor added successfully to Dictionary and AVL Tree!" << endl;
+            } else {
+                cerr << "Error: Actor insertion failed!" << endl;
+            }
         } else if (choice == 2) {
             // Add new movie
             int id;
@@ -487,9 +508,19 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             cout << "Enter new birth year (enter 0 to keep current): ";
             cin >> newBirthYear;
 
-            // Update the actor's details
-            selectedActor->updateDetails(newName, newBirthYear);
+            int oldBirthYear = selectedActor->getBirthYear();
 
+            // If birth year is updated, remove & reinsert using update()
+            if (newBirthYear != 0 && newBirthYear != oldBirthYear) {
+                Actor updatedActor = *selectedActor;  // Copy existing data
+                updatedActor.updateDetails(newName, newBirthYear);  // Update fields
+
+                actorTree.update(selectedActor, &updatedActor);
+            } else {
+                // Simply update details without AVL rebalancing
+                selectedActor->updateDetails(newName, newBirthYear);
+            }
+            
             cout << "\nActor details updated successfully!" << endl;
         } else if (choice == 8) {
             // Update movie details by searching for title
@@ -548,56 +579,23 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             cin >> minAge;
             cout << "Enter the maximum age (y): ";
             cin >> maxAge;
-
+        
             if (minAge > maxAge) {
                 cout << "Invalid range. Ensure that minimum age <= maximum age." << endl;
                 return;
             }
-
-            // Collect all actors into a dynamic array
-            allActors = new Actor*[actorTable.getSize()];
-            totalActors = 0; // Reset total actor count
-
-            // Use the standalone function
-            actorTable.display(collectActors);
-            // Filter and sort actors by age range
-            int filteredCount = 0;
-            Actor** filteredActors = Actor::filterAndSortByAge(allActors, totalActors, minAge, maxAge, filteredCount);
-
-            // Display the filtered and sorted actors
-            if (filteredCount > 0) {
-                cout << "Actors with age between " << minAge << " and " << maxAge << " (sorted by age):" << endl;
-                for (int i = 0; i < filteredCount; ++i) {
-                    int age = 2025 - filteredActors[i]->getBirthYear();
-                    cout << "Actor ID: " << filteredActors[i]->getId()
-                        << ", Name: " << filteredActors[i]->getName()
-                        << ", Age: " << age << endl;
-                }
-            } else {
-                cout << "No actors found in the specified age range." << endl;
-            }
-
-            // Free allocated memory
-            delete[] allActors;
-            delete[] filteredActors;
+        
+            // Directly use AVL Tree to search and display actors
+            actorTree.displayActorsInAgeRange(minAge, maxAge);
         } else if (choice == 10) {
-            // Allocate memory for recent movies
-            recentMovies = new Movie*[movieTable.getSize()];
-            movieCount = 0;
+            int currentYear = 2025;
+            int pastyear = currentYear - 3;
 
-            // Collect movies released in the past 3 years
-            movieTable.display(collectRecentMovies);
+            std::cout << "\nAll Movies in AVL Tree (Sorted by Year & ID):\n";
+            movieTree.displayAllMovies();
 
-            if (movieCount > 0) {
-                // Sort movies using AVL tree
-                Movie::sortMoviesByReleaseYear(recentMovies, movieCount);
-            } else {
-                cout << "No movies found from the past 3 years." << endl;
-            }
-
-            // Free allocated memory
-            delete[] recentMovies;
-            recentMovies = nullptr;
+            cout << "\nMovies released in the past 3 years (sorted by year):\n";
+            movieTree.displayMoviesInRange(pastyear, currentYear);
         } else if (choice == 11) {
             // Search for an actor by name instead of ID
             string actorName;
@@ -826,13 +824,20 @@ int main() {
     Dictionary<Actor> actorTable(100); // Actor hash table
     Dictionary<Movie> movieTable(100); // Movie hash table
 
-    // Load data from CSV files
-    loadActors("actors.csv", actorTable);
-    loadMovies("movies.csv", movieTable);
-    loadCast("cast.csv", actorTable, movieTable);
+    AVLTree<Actor> actorTree([](Actor* actor) {
+        return (2025 - actor->getBirthYear()) * 1000000 + actor->getId();
+    });
 
+    AVLTree<Movie> movieTree([](Movie* movie) {
+        return movie->getReleaseYear() * 1000000 + movie->getId();
+    });    
+    
+    // Load data from CSV files
+    loadActors("actors.csv", actorTable, actorTree);
+    loadMovies("movies.csv", movieTable, movieTree);
+    loadCast("cast.csv", actorTable, movieTable);
     // Run the application
-    runApplication(actorTable, movieTable);
+    runApplication(actorTable, movieTable,actorTree, movieTree);
 
     // // Save data back to CSV files
     // saveActorsToCSV("actors.csv", actorTable);
