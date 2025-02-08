@@ -6,16 +6,11 @@ using namespace std;
 
 // Constructor
 Movie::Movie(const int& id, const string& title, const string& plot, int releaseYear)
-    : id(id), title(title), plot(plot), releaseYear(releaseYear), actorHead(nullptr), rating(0.0f) {}
+    : id(id), title(title), plot(plot), releaseYear(releaseYear), rating(0.0f) {}
 
 // Destructor
 Movie::~Movie() {
-    ActorNode* current = actorHead;
-    while (current) {
-        ActorNode* temp = current;
-        current = current->next;
-        delete temp;
-    }
+    actors.clear();  // clears all linked actors
 }
 
 // Getter methods
@@ -42,9 +37,8 @@ void Movie::setRating(float newRating) {
 
 // Add an actor to the movie's list
 void Movie::addActor(Actor* actor) {
-    ActorNode* newNode = new ActorNode(actor);
-    newNode->next = actorHead;
-    actorHead = newNode;
+    if (!actor || actors.contains(actor)) return;  // Prevent duplicates
+    actors.append(actor);
 }
 
 
@@ -62,98 +56,20 @@ void Movie::updateDetails(const string& newTitle, const string& newPlot, int new
 }
 
 
-// Display movie details and their actors
+// Updated display to use function pointer instead of lambda
 void Movie::display() const {
     cout << "Movie ID: " << id << ", \nTitle: " << title
          << ", \nPlot: " << plot << ", \nRelease Year: " << releaseYear << endl;
+
     cout << "\nActors in this movie:" << endl;
-
-    ActorNode* current = actorHead;
-    if (!current) {
-        cout << "No actors in this movie." << endl;
-        return;
-    }
-
-    while (current) {
-        // Display both actor ID and name
-        cout << " - ID: " << current->actor->getId()
-             << ", Name: " << current->actor->getName() << endl;
-        current = current->next;
-    }
+    actors.display(Movie::displayActorInfo);  // Use function pointer
 }
 
+// Static function to display an actor
+void Movie::displayActorInfo(const Actor& actor) {
+    cout << " - ID: " << actor.getId() << ", Name: " << actor.getName() << endl;
+}
 
-// void mergeActors(Actor** actors, int left, int mid, int right) {
-//     int n1 = mid - left + 1;
-//     int n2 = right - mid;
-
-//     // Temporary arrays
-//     Actor** leftArray = new Actor*[n1];
-//     Actor** rightArray = new Actor*[n2];
-
-//     // Copy data to temporary arrays
-//     for (int i = 0; i < n1; ++i)
-//         leftArray[i] = actors[left + i];
-//     for (int j = 0; j < n2; ++j)
-//         rightArray[j] = actors[mid + 1 + j];
-
-//     // Merge the arrays back into actors[left..right]
-//     int i = 0, j = 0, k = left;
-//     while (i < n1 && j < n2) {
-//         if (leftArray[i]->getName() <= rightArray[j]->getName())
-//             actors[k++] = leftArray[i++];
-//         else
-//             actors[k++] = rightArray[j++];
-//     }
-
-//     // Copy remaining elements
-//     while (i < n1)
-//         actors[k++] = leftArray[i++];
-//     while (j < n2)
-//         actors[k++] = rightArray[j++];
-
-//     // Free temporary arrays
-//     delete[] leftArray;
-//     delete[] rightArray;
-// }
-
-// void mergeSortActors(Actor** actors, int left, int right) {
-//     if (left < right) {
-//         int mid = left + (right - left) / 2;
-
-//         // Sort first and second halves
-//         mergeSortActors(actors, left, mid);
-//         mergeSortActors(actors, mid + 1, right);
-
-//         // Merge the sorted halves
-//         mergeActors(actors, left, mid, right);
-//     }
-// }
-
-// // Time Complexity: O(n log n)
-// // Space Complexity: O(n)
-// Actor** Movie::getSortedActors(int& count) const {
-//     // Count the number of actors
-//     count = 0;
-//     ActorNode* current = actorHead;
-//     while (current != nullptr) {
-//         count++;
-//         current = current->next;
-//     }
-
-//     // Create an array to hold the actors
-//     Actor** actors = new Actor*[count];
-//     current = actorHead;
-//     for (int i = 0; i < count; ++i) {
-//         actors[i] = current->actor;
-//         current = current->next;
-//     }
-
-//     // Apply merge sort
-//     mergeSortActors(actors, 0, count - 1); // Time Complexity: O(n log n)
-
-//     return actors;
-// }
 
 // Insertion Sort for Sorting Actors by Name
 void insertionSortActors(Actor** actors, int count) {
@@ -172,48 +88,70 @@ void insertionSortActors(Actor** actors, int count) {
 
 // **Updated Sorting Function Using Insertion Sort**
 Actor** Movie::getSortedActors(int& count) const {
-    // Count the number of actors
-    count = 0;
-    ActorNode* current = actorHead;
-    while (current != nullptr) {
-        count++;
-        current = current->next;
-    }
-
-    // Create an array to hold the actors
-    Actor** actors = new Actor*[count];
-    current = actorHead;
-    for (int i = 0; i < count; ++i) {
-        actors[i] = current->actor;
-        current = current->next;
-    }
+    Actor** actorArray = actors.toArray(count);
+    if (count == 0) return nullptr;
 
     // **Use Insertion Sort (Better for Small Data Sets)**
-    insertionSortActors(actors, count); // O(n^2) worst case, O(n) best case
+    insertionSortActors(actorArray, count); // O(n^2) worst case, O(n) best case
 
-    return actors;
+    return actorArray;
 }
 
-ActorNode* Movie::getActorHead() const {
-    return actorHead;
-}
 
-//
-// Change to Merge Sort
-//
-Movie** Movie::sortMoviesByRating(Movie** movies, int count) const {
-    // Perform Bubble Sort (Descending Order by Rating)
-    for (int i = 0; i < count - 1; ++i) {
-        for (int j = 0; j < count - i - 1; ++j) {
-            if (movies[j]->getRating() < movies[j + 1]->getRating()) {
-                // Swap movies
-                Movie* temp = movies[j];
-                movies[j] = movies[j + 1];
-                movies[j + 1] = temp;
-            }
+
+// Merge function for sorting movies by rating
+void Movie::mergeByRating(Movie** movies, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+
+    // Temporary arrays
+    Movie** leftArray = new Movie*[n1];
+    Movie** rightArray = new Movie*[n2];
+
+    // Copy data to temp arrays
+    for (int i = 0; i < n1; ++i) leftArray[i] = movies[left + i];
+    for (int j = 0; j < n2; ++j) rightArray[j] = movies[mid + 1 + j];
+
+    int i = 0, j = 0, k = left;
+
+    // Merge the arrays by rating in **descending** order
+    while (i < n1 && j < n2) {
+        if (leftArray[i]->getRating() >= rightArray[j]->getRating()) {
+            movies[k++] = leftArray[i++];
+        } else {
+            movies[k++] = rightArray[j++];
         }
     }
-    return movies; // Return the sorted array
+
+    // Copy remaining elements
+    while (i < n1) movies[k++] = leftArray[i++];
+    while (j < n2) movies[k++] = rightArray[j++];
+
+    // Free memory
+    delete[] leftArray;
+    delete[] rightArray;
+}
+
+// Merge Sort function for sorting movies by rating
+void Movie::mergeSortByRating(Movie** movies, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        // Sort both halves
+        mergeSortByRating(movies, left, mid);
+        mergeSortByRating(movies, mid + 1, right);
+
+        // Merge the sorted halves
+        mergeByRating(movies, left, mid, right);
+    }
+}
+
+// **Updated Sorting Function (Using Merge Sort)**
+Movie** Movie::sortMoviesByRating(Movie** movies, int count) const {
+    if (count > 1) {
+        mergeSortByRating(movies, 0, count - 1);
+    }
+    return movies; // Return sorted array
 }
 
 // Insertion Sort for Movies by Rating
@@ -296,4 +234,10 @@ void Movie::recommendMoviesByYear(Movie** movies, int totalMovies, int year) con
     }
 
     delete[] yearMovies;
+}
+
+
+// ✅ Get LinkedList of actors
+LinkedList<Actor>& Movie::getActors() {
+    return actors;
 }

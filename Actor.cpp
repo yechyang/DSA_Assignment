@@ -6,17 +6,13 @@ using namespace std;
 
 // Constructor
 Actor::Actor(const int& id, const string& name, int birthYear)
-    : id(id), name(name), birthYear(birthYear), movieHead(nullptr), rating(0.0f) {}
+    : id(id), name(name), birthYear(birthYear), rating(0.0f) {}
 
 // Destructor
 Actor::~Actor() {
-    MovieNode* current = movieHead;
-    while (current) {
-        MovieNode* temp = current;
-        current = current->next;
-        delete temp;
-    }
+    movies.clear();  // Use LinkedList clear function
 }
+
 
 // Getter methods
 int Actor::getId() const { return id; }
@@ -39,28 +35,14 @@ void Actor::setRating(float newRating) {
 
 // Add a movie to the actor's list
 void Actor::addMovie(Movie* movie) {
-    if (!movie) return;
-
-    // ✅ Prevent duplicates
-    MovieNode* current = movieHead;
-    while (current) {
-        if (current->movie == movie) return;  // Already linked, no need to re-add
-        current = current->next;
-    }
-
-    // ✅ Append instead of overwrite
-    MovieNode* newNode = new MovieNode(movie);
-    newNode->next = movieHead;
-    movieHead = newNode;
-
-    cout << "[Debug] Added Movie to Actor: " << name << " -> " 
-         << movie->getTitle() << " (ID: " << movie->getId() << ")" << endl;
+    if (!movie || movies.contains(movie)) return;  // Prevent duplicates
+    movies.append(movie);
 }
 
 
-// New method to return the head of the movie list
-const MovieNode* Actor::getMovies() const {
-    return movieHead;
+// Get movies list
+LinkedList<Movie>& Actor::getMovies() {
+    return movies;
 }
 
 void Actor::updateDetails(const string& newName, int newBirthYear) {
@@ -72,17 +54,16 @@ void Actor::updateDetails(const string& newName, int newBirthYear) {
     }
     cout << "Actor details updated successfully." << endl;
 }
-
 // Display actor details and their movies
-void Actor::display() const {
-    cout << "Actor ID: " << id << ", \nName: " << name << ", \nBirth Year: " << birthYear << endl;
-    cout << "\nMovies:" << endl;
+void displayMovie(const Movie& movie) {
+    movie.display();  // Call Movie's display function
+}
 
-    MovieNode* current = movieHead;
-    while (current) {
-        current->movie->display();
-        current = current->next;
-    }
+void Actor::display() const {
+    cout << "Actor ID: " << id << ", Name: " << name << ", Birth Year: " << birthYear << endl;
+    cout << "\nMovies:" << endl;
+    
+    movies.display(displayMovie);
 }
 
 // // Time Complexity: O(n log n)
@@ -175,28 +156,16 @@ void insertionSortMovies(Movie** movies, int count) {
     }
 }
 
-// **Updated Sorting Function Using Insertion Sort**
 Movie** Actor::getSortedMovies(int& count) const {
-    // Count the number of movies
-    count = 0;
-    MovieNode* current = movieHead;
-    while (current != nullptr) {
-        count++;
-        current = current->next;
-    }
+    // Convert LinkedList to an array using the actual `movies` LinkedList instance
+    Movie** movieArray = movies.toArray(count);  // Call `toArray()` correctly
 
-    // Create an array to hold the movies
-    Movie** movies = new Movie*[count];
-    current = movieHead;
-    for (int i = 0; i < count; ++i) {
-        movies[i] = current->movie;
-        current = current->next;
-    }
+    if (count == 0) return nullptr;
 
-    // **Use Insertion Sort (Better for Small Data Sets)**
-    insertionSortMovies(movies, count); // O(n^2) worst case, O(n) best case
+    // Use Insertion Sort for sorting
+    insertionSortMovies(movieArray, count); // O(n^2) worst case, O(n) best case
 
-    return movies;
+    return movieArray;
 }
 
 // void Actor::merge(Actor** actors, int left, int mid, int right) {
@@ -340,12 +309,12 @@ void Actor::displayKnownActors() const {
     Dictionary<bool> level1Actors; // Track level-1 actors separately
 
     // First-level connections
-    const MovieNode* movieNode = movieHead;
+    ListNode<Movie>* movieNode = movies.getHead(); // ✅ Use LinkedList<Movie> instead of movieHead
     while (movieNode) {
-        Movie* movie = movieNode->movie;
-        const ActorNode* actorNode = movie->getActorHead();
+        Movie* movie = movieNode->data;
+        ListNode<Actor>* actorNode = movie->getActors().getHead(); // ✅ Get actors from LinkedList<Actor>
         while (actorNode) {
-            Actor* currentActor = actorNode->actor;
+            Actor* currentActor = actorNode->data;
             if (currentActor != this && !processedActors.search(currentActor->getId())) {
                 knownActors[knownCount++] = currentActor;
                 processedActors.insert(currentActor->getId(), true);
@@ -361,12 +330,12 @@ void Actor::displayKnownActors() const {
         Actor* level1Actor = knownActors[i];
         if (!level1Actors.search(level1Actor->getId())) continue; // Ensure only level-1 actors expand
 
-        const MovieNode* level1MovieNode = level1Actor->getMovies();
+        ListNode<Movie>* level1MovieNode = level1Actor->getMovies().getHead(); // ✅ Get movies from LinkedList<Movie>
         while (level1MovieNode) {
-            Movie* movie = level1MovieNode->movie;
-            const ActorNode* actorNode = movie->getActorHead();
+            Movie* movie = level1MovieNode->data;
+            ListNode<Actor>* actorNode = movie->getActors().getHead();
             while (actorNode) {
-                Actor* currentActor = actorNode->actor;
+                Actor* currentActor = actorNode->data;
                 if (currentActor != this && !processedActors.search(currentActor->getId())) {
                     knownActors[knownCount++] = currentActor;
                     processedActors.insert(currentActor->getId(), true);
@@ -450,15 +419,17 @@ void Actor::recommendActorsByRating(Actor** actors, int totalActors, float minRa
     for (int i = 0; i < totalActors; ++i) {
         if (actors[i]->getRating() >= minRating) {
             cout << "- " << actors[i]->getName() << " (Rating: " << actors[i]->getRating() << "/10)\n";
-            
-            // Display movies the actor is in
-            const MovieNode* movieNode = actors[i]->getMovies();
+
+            // ✅ Use LinkedList<Movie> instead of `movieHead`
+            ListNode<Movie>* movieNode = actors[i]->getMovies().getHead();
             if (!movieNode) {
                 cout << "  No movies found for this actor.\n";
             } else {
                 cout << "  Movies:\n";
                 while (movieNode) {
-                    cout << "    * " << movieNode->movie->getTitle() << " (Year: " << movieNode->movie->getReleaseYear() << " Rating: " << movieNode->movie->getRating() <<"/10)\n";
+                    cout << "    * " << movieNode->data->getTitle()
+                         << " (Year: " << movieNode->data->getReleaseYear()
+                         << " Rating: " << movieNode->data->getRating() << "/10)\n";
                     movieNode = movieNode->next;
                 }
                 cout << endl;
@@ -471,3 +442,4 @@ void Actor::recommendActorsByRating(Actor** actors, int totalActors, float minRa
         cout << "No actors found with the specified rating.\n";
     }
 }
+

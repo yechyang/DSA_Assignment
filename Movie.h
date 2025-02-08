@@ -2,34 +2,27 @@
 #define MOVIE_H
 
 #include <string>
+#include "LinkedList.h"  // Include LinkedList for managing actors
+
 using namespace std;
 
 class Actor; // Forward declaration
 
-struct MovieAVLNode;
-
-// Linked list node for storing relationships
-struct ActorNode {
-    Actor* actor;
-    ActorNode* next;
-
-    ActorNode(Actor* actor) : actor(actor), next(nullptr) {}
-};
-
 class Movie {
 private:
-    int id;            // Movie's unique ID
-    string title;         // Movie title
-    string plot;          // Movie plot
-    int releaseYear;      // Release year of the movie
-    ActorNode* actorHead; // Head of the linked list of actors
-    float rating; // Movie's rating
+    int id;                 // Movie's unique ID
+    string title;           // Movie title
+    string plot;            // Movie plot
+    int releaseYear;        // Release year of the movie
+    LinkedList<Actor> actors; // Linked list for storing actors LinkedList<Actor>
+    float rating;           // Movie's rating
+    static void displayActorInfo(const Actor& actor);
+    static void mergeByRating(Movie** movies, int left, int mid, int right);
+    static void mergeSortByRating(Movie** movies, int left, int right);
 
 public:
-    // Constructor
+    // Constructor & Destructor
     Movie(const int& id = 0, const string& title = "", const string& plot = "", int releaseYear = 0);
-
-    // Destructor
     ~Movie();
 
     // Getter methods
@@ -46,7 +39,7 @@ public:
     void setReleaseYear(int releaseYear);
     void setRating(float newRating);
 
-    // Add an actor to the movie's list
+    // Add an actor to the movie's actor list
     void addActor(Actor* actor);
 
     // Update movie details
@@ -65,7 +58,7 @@ public:
 
     void insertionSortMoviesByRating(Movie** movies, int count) const;
 
-    ActorNode* getActorHead() const;
+    LinkedList<Actor>& getActors();
 };
 
 #endif

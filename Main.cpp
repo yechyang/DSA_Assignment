@@ -149,113 +149,6 @@ void loadCast(const string& filename, Dictionary<Actor>& actorTable, Dictionary<
     cout << "Cast relationships loaded from " << filename << endl;
 }
 
-// Helper function to write actor data to file
-void writeActorToFile(const Actor& actor, ofstream& file) {
-    file << actor.getId() << "," << actor.getName() << "," << actor.getBirthYear() << "\n";
-}
-
-// Wrapper function for Dictionary's display
-void writeActor(const Actor& actor) {
-    extern ofstream* globalFile; // Declare a global file pointer
-    writeActorToFile(actor, *globalFile);
-}
-
-// Helper function to write movie data to file
-void writeMovieToFile(const Movie& movie, ofstream& file) {
-    file << movie.getId() << "," << movie.getTitle() << "," << movie.getPlot() << "," << movie.getReleaseYear() << "\n";
-}
-
-// Wrapper function for Dictionary's display
-void writeMovie(const Movie& movie) {
-    extern ofstream* globalFile; // Declare a global file pointer
-    writeMovieToFile(movie, *globalFile);
-}
-
-// Helper function to write actor-movie relationships to file
-ofstream* castFile;
-void writeCastToFile(const Actor& actor, ofstream& file) {
-    for (const MovieNode* movieNode = actor.getMovies(); movieNode != nullptr; movieNode = movieNode->next) {
-        file << actor.getId() << "," << movieNode->movie->getId() << "\n";
-    }
-}
-
-// Wrapper function for Dictionary's display
-void writeCast(const Actor& actor) {
-    extern ofstream* globalFile; // Declare a global file pointer
-    writeCastToFile(actor, *globalFile);
-}
-
-ofstream* globalFile; // Global file pointer
-// Function to save actors to CSV
-void saveActorsToCSV(const string& filename, const Dictionary<Actor>& actorTable) {
-    ofstream file(filename);
-    if (!file.is_open()) {
-        cerr << "Error opening " << filename << " for writing." << endl;
-        return;
-    }
-
-    // Write CSV header
-    file << "id,name,birthYear\n";
-
-    // Set the global file pointer
-    globalFile = &file;
-
-    // Write actor data
-    actorTable.display(writeActor);
-
-    // Reset the global file pointer
-    globalFile = nullptr;
-
-    file.close();
-    cout << "Actors saved to " << filename << endl;
-}
-// Function to save movies to CSV
-void saveMoviesToCSV(const string& filename, const Dictionary<Movie>& movieTable) {
-    ofstream file(filename);
-    if (!file.is_open()) {
-        cerr << "Error opening " << filename << " for writing." << endl;
-        return;
-    }
-
-    // Write CSV header
-    file << "id,title,plot,releaseYear\n";
-
-    // Set the global file pointer
-    globalFile = &file;
-
-    // Write movie data
-    movieTable.display(writeMovie);
-
-    // Reset the global file pointer
-    globalFile = nullptr;
-
-    file.close();
-    cout << "Movies saved to " << filename << endl;
-}
-
-// Function to save cast relationships to CSV
-void saveCastToCSV(const string& filename, const Dictionary<Actor>& actorTable) {
-    ofstream file(filename);
-    if (!file.is_open()) {
-        cerr << "Error opening " << filename << " for writing." << endl;
-        return;
-    }
-
-    // Write CSV header
-    file << "actorId,movieId\n";
-
-    // Set the global file pointer
-    globalFile = &file;
-
-    // Write actor-movie relationships
-    actorTable.display(writeCast);
-
-    // Reset the global file pointer
-    globalFile = nullptr;
-
-    file.close();
-    cout << "Cast relationships saved to " << filename << endl;
-}
 // Global variables for filtering logic
 Actor** allActors = nullptr;
 int totalActors = 0;
@@ -384,7 +277,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched movies
             cout << "Movies found:" << endl;
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") "  << movies[i]->getTitle() << " (Year: " << movies[i]->getReleaseYear() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << " (Year: " << movies[i]->getReleaseYear() << ")" << endl;
             }
 
             // User selects a movie
@@ -540,7 +433,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched movies
             cout << "\nMovies found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << movies[i]->getTitle() << " (Year: " << movies[i]->getReleaseYear() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << " (Year: " << movies[i]->getReleaseYear() << ")" << endl;
             }
 
             // User selects a movie
@@ -695,7 +588,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched movies
             cout << "\nMovies found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << movies[i]->getTitle() << " (Year: " << movies[i]->getReleaseYear() << ")" << endl;
+                cout << "(" << i + 1 << ") "<< "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << " (Year: " << movies[i]->getReleaseYear() << ")" << endl;
             }
 
             // Let user pick a movie from the list
@@ -842,11 +735,6 @@ int main() {
     loadCast("cast.csv", actorTable, movieTable);
     // Run the application
     runApplication(actorTable, movieTable,actorTree, movieTree);
-
-    // // Save data back to CSV files
-    // saveActorsToCSV("actors.csv", actorTable);
-    // saveMoviesToCSV("movies.csv", movieTable);
-    // saveCastToCSV("cast.csv", actorTable);
 
     return 0;
 }
