@@ -819,18 +819,22 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
     }
 }
 
+// Function to compute the key for actor sorting
+int computeActorKey(Actor* actor) {
+    return (2025 - actor->getBirthYear()) * 1000000 + actor->getId();
+}
+
+// Function to compute the key for movie sorting
+int computeMovieKey(Movie* movie) {
+    return movie->getReleaseYear() * 1000000 + movie->getId();
+}
 // Main function
 int main() {
     Dictionary<Actor> actorTable; // Actor hash table
     Dictionary<Movie> movieTable; // Movie hash table
 
-    AVLTree<Actor> actorTree([](Actor* actor) {
-        return (2025 - actor->getBirthYear()) * 1000000 + actor->getId();
-    });
-
-    AVLTree<Movie> movieTree([](Movie* movie) {
-        return movie->getReleaseYear() * 1000000 + movie->getId();
-    });    
+    AVLTree<Actor> actorTree(computeActorKey);
+    AVLTree<Movie> movieTree(computeMovieKey);
     
     // Load data from CSV files
     loadActors("actors.csv", actorTable, actorTree);

@@ -99,18 +99,20 @@ AVLNode<T>* AVLTree<T>::insert(AVLNode<T>* node, T* data) {
 
 
 // Public insert function
-template <typename T>
-void AVLTree<T>::insert(T* data) {
+template <>
+void AVLTree<Actor>::insert(Actor* data) {
     int key = keyFunc(data);
+    std::cout << "Inserting into AVLTree: " << data->getName() 
+              << " with Key: " << key << std::endl;
+    root = insert(root, data);
+}
 
-    if constexpr (std::is_same<T, Actor>::value) {
-        cout << "Inserting into AVLTree: " << data->getName() 
-             << " with Key: " << key << endl;
-    } else if constexpr (std::is_same<T, Movie>::value) {
-        cout << "Inserting into AVLTree: " << data->getTitle() 
-             << " with Key: " << key << endl;
-    }
-
+// Public insert function for Movie
+template <>
+void AVLTree<Movie>::insert(Movie* data) {
+    int key = keyFunc(data);
+    std::cout << "Inserting into AVLTree: " << data->getTitle() 
+              << " with Key: " << key << std::endl;
     root = insert(root, data);
 }
 
@@ -183,70 +185,60 @@ void AVLTree<T>::update(T* oldData, T* newData) {
     insert(newData);  // Insert updated node
 }
 
-// Helper function for in-order traversal
-template <typename T>
-void AVLTree<T>::displayAll(AVLNode<T>* node) {
-    if (!node) return;
+// // Helper function for in-order traversal
+// template <typename T>
+// void AVLTree<T>::displayAll(AVLNode<T>* node) {
+//     if (!node) return;
 
-    // Visit left subtree (younger actors)
-    displayAll(node->left);
+//     // Visit left subtree (younger actors)
+//     displayAll(node->left);
 
-    // Display current actor
-    if constexpr (std::is_same<T, Actor>::value) {
-        std::cout << "Actor ID: " << node->data->getId()
-                  << ", Name: " << node->data->getName()
-                  << ", Age: " << (2025 - node->data->getBirthYear()) << std::endl;
-    }
+//     // Display current actor
+//     if constexpr (std::is_same<T, Actor>::value) {
+//         std::cout << "Actor ID: " << node->data->getId()
+//                   << ", Name: " << node->data->getName()
+//                   << ", Age: " << (2025 - node->data->getBirthYear()) << std::endl;
+//     }
 
-    // Visit right subtree (older actors)
-    displayAll(node->right);
-}
+//     // Visit right subtree (older actors)
+//     displayAll(node->right);
+// }
 
-// Public function to display all nodes
-template <typename T>
-void AVLTree<T>::displayAll() {
-    displayAll(root);
-}
+// // Public function to display all nodes
+// template <typename T>
+// void AVLTree<T>::displayAll() {
+//     displayAll(root);
+// }
 
 // Function to display actors in a specific age range
-template <typename T>
-void AVLTree<T>::displayActorsInAgeRange(AVLNode<T>* node, int minAge, int maxAge) {
+template <>
+void AVLTree<Actor>::displayActorsInAgeRange(AVLNode<Actor>* node, int minAge, int maxAge) {
     if (!node) return;
 
-    int currentYear = 2025;  // Assuming 2025 is the current year
+    int currentYear = 2025;
+    int actorAge = currentYear - node->data->getBirthYear();
 
-    // Ensure this function only works for Actor objects
-    if constexpr (sizeof(T) == sizeof(Actor)) {  // Compare sizes as a type check workaround
-        int actorAge = currentYear - node->data->getBirthYear();
+    // 🔄 Move left to check for younger actors
+    if (actorAge >= minAge)
+        displayActorsInAgeRange(node->left, minAge, maxAge);
 
-        // If the actor might be in range, check the left subtree
-        if (actorAge >= minAge)
-            displayActorsInAgeRange(node->left, minAge, maxAge);
-
-        // If the actor is within range, print their details
-        if (actorAge >= minAge && actorAge <= maxAge) {
-            std::cout << "Actor ID: " << node->data->getId()
-                    << ", Name: " << node->data->getName()
-                    << ", Age: " << actorAge << std::endl;
-        }
-
-        // If the actor might still be in range, check the right subtree
-        if (actorAge <= maxAge)
-            displayActorsInAgeRange(node->right, minAge, maxAge);
-    } else {
-        std::cerr << "Error: displayActorsInAgeRange() only works for Actor objects." << std::endl;
+    // ✅ Print actors inside the range
+    if (actorAge >= minAge && actorAge <= maxAge) {
+        std::cout << "Actor ID: " << node->data->getId()
+                  << ", Name: " << node->data->getName()
+                  << ", Age: " << actorAge << std::endl;
     }
+
+    // 🔄 Move right to check for older actors
+    if (actorAge <= maxAge)
+        displayActorsInAgeRange(node->right, minAge, maxAge);
 }
 
-// Public function to display actors in age range
-template <typename T>
-void AVLTree<T>::displayActorsInAgeRange(int minAge, int maxAge) {
-    if (sizeof(T) == sizeof(Actor)) {  // Ensure this is only called for Actors
-        std::cout << "\nActors with age between " << minAge << " and " << maxAge << " (sorted by age):\n";
-        displayActorsInAgeRange(root, minAge, maxAge);
-    } else {
-        std::cerr << "Error: displayActorsInAgeRange() only works for Actor objects." << std::endl;
-    }
+// Public function to display actors in age range (Specialization for Actor)
+template <>
+void AVLTree<Actor>::displayActorsInAgeRange(int minAge, int maxAge) {
+    std::cout << "\nActors with age between " << minAge << " and " << maxAge << " (sorted by age):\n";
+    displayActorsInAgeRange(root, minAge, maxAge);
 }
 
 // Function to display movies in a specific release year range

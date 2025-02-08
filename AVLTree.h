@@ -31,7 +31,7 @@ private:
     AVLNode<T>* insert(AVLNode<T>* node, T* data);
     AVLNode<T>* remove(AVLNode<T>* node, T* data);
     AVLNode<T>* findMin(AVLNode<T>* node);
-    void displayAll(AVLNode<T>* node);
+    // void displayAll(AVLNode<T>* node);
     void displayActorsInAgeRange(AVLNode<T>* node,int minAge, int maxAge);
     void displayMoviesInRange(AVLNode<T>* node, int minYear, int maxYear);
     void displayAllMovies(AVLNode<Movie>* node);
@@ -44,7 +44,7 @@ public:
     void remove(T* data);
     void update(T* oldData, T* newData);
 
-    void displayAll();
+    // void displayAll();
 
     void displayActorsInAgeRange(int minAge, int maxAge);
 
