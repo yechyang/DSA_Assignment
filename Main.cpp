@@ -219,8 +219,8 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         cout << "10. Display a list of all actors that a particular actor knows.\n";
         cout << "11. Update actor rating" << endl;
         cout << "12. Update movie rating" << endl;
-        cout << "13. Display minimum rating for Movie.\n";
-        cout << "14. Display minimum rating for Actor.\n";
+        cout << "13. Display movies with a rating above the minimum rating.\n";
+        cout << "14. Display actor with a rating above the minimum rating.\n";
         cout << "0. Exit\n";
         cout << "Enter your choice: ";
         cin >> choice;
