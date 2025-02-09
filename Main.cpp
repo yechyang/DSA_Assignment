@@ -182,7 +182,23 @@ void collectRecentMovies(const Movie& movie) {
         recentMovies[movieCount++] = const_cast<Movie*>(&movie);
     }
 }
+// Function to manually trim whitespace from a string (no STL)
+void trimString(string& str) {
+    int start = 0, end = str.length() - 1;
 
+    // Trim leading spaces
+    while (start <= end && (str[start] == ' ' || str[start] == '\t' || str[start] == '\n' || str[start] == '\r')) {
+        start++;
+    }
+
+    // Trim trailing spaces
+    while (end >= start && (str[end] == ' ' || str[end] == '\t' || str[end] == '\n' || str[end] == '\r')) {
+        end--;
+    }
+
+    // Extract the trimmed string
+    str = str.substr(start, end - start + 1);
+}
 
 // Menu-driven application
 void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable, AVLTree<Actor>& actorTree, AVLTree<Movie>& movieTree, Graph& actorGraph) {
@@ -215,83 +231,204 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             int id;
             string name;
             int birthYear;
-            cout << "Enter Actor ID: ";
-            cin >> id;
-            cout << "Enter Actor Name: ";
-            cin.ignore();
-            getline(cin, name);
-            cout << "Enter Birth Year: ";
-            cin >> birthYear;
-            Actor actor(id, name, birthYear);
-            actorTable.insert(id, actor);
-            cout << "Actor added successfully!" << endl;
-            Actor* actorPtr = actorTable.search(id);
 
-            if (actorPtr) {
-                actorTree.insert(actorPtr);
-            } else {
-                cerr << "Error: Actor insertion failed!" << endl;
+            // Input validation for ID
+            cout << "Enter Actor ID: ";
+            while (!(cin >> id) || id < 0) {
+                cerr << "Invalid ID. Please enter a positive integer." << endl;
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Enter Actor ID: ";
+            }
+
+            // Check if Actor ID already exists
+            if (actorTable.search(id) != nullptr) {
+                cerr << "Error: Actor ID already exists!" << endl;
+                return;
+            }
+
+            // Input validation for Name
+            cin.ignore();
+            while (true) {
+                cout << "Enter Actor Name: ";
+                getline(cin, name);
+                trimString(name);  // Manually trim whitespace
+
+                if (!name.empty()) {
+                    break;
+                }
+                cerr << "Error: Actor name cannot be empty. Please enter a valid name." << endl;
+            }
+
+            // Input validation for Birth Year
+            cout << "Enter Birth Year: ";
+            while (!(cin >> birthYear) || birthYear < 1800 || birthYear > 2025) {
+                cerr << "Invalid Birth Year. Please enter a valid year (1800-2025)." << endl;
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Enter Birth Year: ";
+            }
+
+            // Insert actor
+            try {
+                Actor actor(id, name, birthYear);
+                actorTable.insert(id, actor);
+                cout << "Actor added successfully!" << endl;
+
+                Actor* actorPtr = actorTable.search(id);
+                if (actorPtr) {
+                    actorTree.insert(actorPtr);
+                } else {
+                    cerr << "Error: Actor insertion failed!" << endl;
+                }
+            } catch (const exception& e) {
+                cerr << "Exception occurred: " << e.what() << endl;
             }
         } else if (choice == 2) {
-            // Add new movie
-            int id;
+            int movieId;
             string title, plot;
             int releaseYear;
+
+            // Input validation for Movie ID
             cout << "Enter Movie ID: ";
-            cin >> id;
-            cout << "Enter Movie Title: ";
+            while (!(cin >> movieId) || movieId < 0) {
+                cerr << "Invalid ID. Please enter a positive integer." << endl;
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Enter Movie ID: ";
+            }
+
+            // Check if Movie ID already exists
+            if (movieTable.search(movieId) != nullptr) {
+                cerr << "Error: Movie ID already exists!" << endl;
+                return;
+            }
+
+            // Input validation for Movie Title
             cin.ignore();
-            getline(cin, title);
-            cout << "Enter Movie Plot: ";
-            getline(cin, plot);
-            cout << "Enter Release Year: ";
-            cin >> releaseYear;
-            Movie movie(id, title, plot, releaseYear);
-            movieTable.insert(id, movie);
-            cout << "Movie added successfully!" << endl;
+            while (true) {
+                cout << "Enter Movie Title: ";
+                getline(cin, title);
+                trimString(title);
 
-            Movie* moviePtr = movieTable.search(id);
+                if (!title.empty()) {
+                    break;
+                }
+                cerr << "Error: Movie title cannot be empty. Please enter a valid title." << endl;
+            }
 
-            if (moviePtr) {
-                // Insert into the AVL Tree
-                movieTree.insert(moviePtr);
-            } else {
-                cerr << "Error: Movie insertion failed!" << endl;
+            // Input validation for Movie Plot
+            while (true) {
+                cout << "Enter Movie Plot: ";
+                getline(cin, plot);
+                trimString(plot);
+
+                if (!plot.empty()) {
+                    break;
+                }
+                cerr << "Error: Movie plot cannot be empty. Please enter a valid plot." << endl;
+            }
+
+            // Input validation for Release Year
+            cout << "Enter Release Year (1888-2025): ";
+            while (!(cin >> releaseYear) || releaseYear < 1888 || releaseYear > 2025) {
+                cerr << "Invalid Release Year. Please enter a valid year (1888-2025)." << endl;
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Enter Release Year: ";
+            }
+
+            // Insert movie
+            try {
+                Movie movie(movieId, title, plot, releaseYear);
+                movieTable.insert(movieId, movie);
+                cout << "Movie added successfully!" << endl;
+
+                Movie* moviePtr = movieTable.search(movieId);
+                if (moviePtr) {
+                    movieTree.insert(moviePtr);
+                } else {
+                    cerr << "Error: Movie insertion failed!" << endl;
+                }
+            } catch (const exception& e) {
+                cerr << "Exception occurred: " << e.what() << endl;
             }
         } else if (choice == 3) {
-            // Add an actor to a movie
             int actorId, movieId;
-            cout << "Enter Actor ID: ";
-            cin >> actorId;
-            cout << "Enter Movie ID: ";
-            cin >> movieId;
 
+            // Input validation for Actor ID
+            cout << "Enter Actor ID: ";
+            while (!(cin >> actorId) || actorId < 0) {
+                cerr << "Invalid Actor ID. Please enter a positive integer." << endl;
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Enter Actor ID: ";
+            }
+
+            // Input validation for Movie ID
+            cout << "Enter Movie ID: ";
+            while (!(cin >> movieId) || movieId < 0) {
+                cerr << "Invalid Movie ID. Please enter a positive integer." << endl;
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Enter Movie ID: ";
+            }
+
+            // Search for Actor and Movie
             Actor* actor = actorTable.search(actorId);
             Movie* movie = movieTable.search(movieId);
 
+            // Ensure both Actor and Movie exist before adding
+            if (!actor) {
+                cerr << "Error: Actor with ID " << actorId << " not found." << endl;
+            }
+            if (!movie) {
+                cerr << "Error: Movie with ID " << movieId << " not found." << endl;
+            }
+
+            // If both exist, establish the relationship
             if (actor && movie) {
-                actor->addMovie(movie);
-                movie->addActor(actor);
-                cout << "Relationship added successfully!" << endl;
-            } else {
-                cerr << "Error: Actor or Movie not found." << endl;
+                // Prevent duplicate additions
+                if (!actor->getMovies().contains(movie) && !movie->getActors().contains(actor)) {
+                    actor->addMovie(movie);
+                    movie->addActor(actor);
+                    cout << "Relationship added successfully!" << endl;
+                } else {
+                    cerr << "Error: Actor is already associated with this movie." << endl;
+                }
             }
         } else if (choice == 4) {
             // Update actor details by searching for name
             string actorName;
-            cout << "Enter Actor Name to update: ";
-            cin.ignore();
-            getline(cin, actorName);
-
             int matchCount;
-            Actor** actors = actorTable.searchByName(actorName, matchCount);
+            Actor** actors = nullptr;
 
-            if (!actors) {
-                cerr << "Error: Actor not found." << endl;
-                return;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Flush input buffer
+
+            while (true) {
+                cout << "Enter Actor Name to update (Enter 0 to return to menu): ";
+                
+                if (!getline(cin, actorName) || actorName.empty()) {
+                    cerr << "Error: Actor name cannot be empty. Please enter a valid name or enter 0 to return.\n";
+                    continue;
+                }
+
+                trimString(actorName);
+
+                if (actorName == "0") {
+                    cout << "Returning to main menu.\n";
+                    return;  // **FIXED: Breaks out of the update actor process, but keeps the menu running**
+                }
+
+                actors = actorTable.searchByName(actorName, matchCount);
+
+                if (actors && matchCount > 0) {
+                    break; // Exit search loop
+                }
+
+                cerr << "Error: Actor not found. Please enter a valid name or enter 0 to return.\n";
             }
 
-            // Display matched actors
             cout << "\nActors found:\n";
             for (int i = 0; i < matchCount; ++i) {
                 cout << "(" << i + 1 << ") " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
@@ -299,13 +436,21 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
             // User selects an actor
             int choice;
-            cout << "Enter the number of the actor you want to update: ";
-            cin >> choice;
+            while (true) {
+                cout << "Enter the number of the actor you want to update (Enter 0 to return to menu): ";
+                if (!(cin >> choice) || choice < 0 || choice > matchCount) {
+                    cerr << "Invalid selection. Please enter a number between 1 and " << matchCount << " or enter 0 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
 
-            if (choice < 1 || choice > matchCount) {
-                cerr << "Invalid selection." << endl;
-                delete[] actors;
-                return;
+                if (choice == 0) {
+                    cout << "Returning to main menu.\n";
+                    delete[] actors;
+                    continue;  // **FIXED: Returns to the main menu instead of exiting**
+                }
+                break;
             }
 
             // Retrieve selected actor
@@ -317,50 +462,111 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Get new details
             string newName;
             int newBirthYear;
-            cout << "Enter new name (leave empty to keep current): ";
-            cin.ignore();
-            getline(cin, newName);
-            cout << "Enter new birth year (enter 0 to keep current): ";
-            cin >> newBirthYear;
+
+            // Input validation for new name
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            while (true) {
+                cout << "Enter new name (leave empty to keep current, Enter 0 to return to menu): ";
+                getline(cin, newName);
+                trimString(newName);
+
+                if (newName == "0") {
+                    cout << "Returning to main menu.\n";
+                    continue;  // **FIXED: Returns to the menu instead of exiting**
+                }
+
+                if (!newName.empty()) {
+                    break;
+                }
+                cerr << "Error: Name cannot be empty. Please enter a valid name or leave blank to keep the current name.\n";
+            }
+
+            // Input validation for birth year
+            while (true) {
+                cout << "Enter new birth year (enter 0 to keep current, Enter -1 to return to menu): ";
+                if (!(cin >> newBirthYear) || (newBirthYear != 0 && newBirthYear != -1 && (newBirthYear < 1800 || newBirthYear > 2025))) {
+                    cerr << "Invalid Birth Year. Please enter a valid year (1800-2025), 0 to keep current, or -1 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+
+                if (newBirthYear == -1) {
+                    cout << "Returning to main menu.\n";
+                    continue;  // **FIXED: Returns to the menu instead of exiting**
+                }
+                break;
+            }
 
             // Update the actor's details
             selectedActor->updateDetails(newName, newBirthYear);
 
             actorTree.insert(selectedActor);
 
-            cout << "\nActor details updated successfully!" << endl;
+            cout << "\nActor details updated successfully!";
+            // Display updated movie details    
+            cout << "\nUpdated actor details:" << endl;
+            cout << "- ID: " << selectedActor->getId() << endl;
+            cout << "- Name: " << selectedActor->getName() << endl;
+            cout << "- BirthYear: " << selectedActor->getBirthYear() << endl;
         }
         else if (choice == 5) {
             
             // Update movie details by searching for title
             string movieTitle;
-            cout << "Enter Movie Title to update: ";
-            cin.ignore();
-            getline(cin, movieTitle);
-
             int matchCount;
-            Movie** movies = movieTable.searchByTitle(movieTitle, matchCount);
+            Movie** movies = nullptr;
 
-            if (!movies) {
-                cerr << "Error: Movie not found." << endl;
-                return;
+            // Input validation for movie title
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Flush input buffer
+            while (true) {
+                cout << "Enter Movie Title to update (Enter 0 to return to menu): ";
+                if (!getline(cin, movieTitle) || movieTitle.empty()) {
+                    cerr << "Error: Movie title cannot be empty. Please enter a valid title or enter 0 to return.\n";
+                    continue;
+                }
+
+                trimString(movieTitle);
+
+                if (movieTitle == "0") {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting the program**
+                }
+
+                movies = movieTable.searchByTitle(movieTitle, matchCount);
+
+                if (movies && matchCount > 0) {
+                    break;  // Exit search loop
+                }
+
+                cerr << "Error: Movie not found. Please enter a valid title or enter 0 to return.\n";
             }
 
             // Display matched movies
             cout << "\nMovies found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << ", Year: " << movies[i]->getReleaseYear() << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId()
+                    << ", Title: " << movies[i]->getTitle()
+                    << ", Year: " << movies[i]->getReleaseYear() << endl;
             }
 
             // User selects a movie
             int choice;
-            cout << "Enter the number of the movie you want to update: ";
-            cin >> choice;
+            while (true) {
+                cout << "Enter the number of the movie you want to update (Enter 0 to return to menu): ";
+                if (!(cin >> choice) || choice < 0 || choice > matchCount) {
+                    cerr << "Invalid selection. Please enter a number between 1 and " << matchCount << " or enter 0 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
 
-            if (choice < 1 || choice > matchCount) {
-                cerr << "Invalid selection." << endl;
-                delete[] movies;
-                return;
+                if (choice == 0) {
+                    cout << "Returning to main menu.\n";
+                    delete[] movies;
+                    return;  // **Returns to menu instead of exiting**
+                }
+                break;
             }
 
             // Retrieve selected movie
@@ -372,21 +578,68 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Get new details
             string newTitle, newPlot;
             int newReleaseYear;
-            cout << "Enter new title (leave empty to keep current): ";
-            cin.ignore();
-            getline(cin, newTitle);
-            cout << "Enter new plot (leave empty to keep current): ";
-            getline(cin, newPlot);
-            cout << "Enter new release year (enter 0 to keep current): ";
-            cin >> newReleaseYear;
 
+            // Input validation for new title
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            while (true) {
+                cout << "Enter new title (leave empty to keep current, Enter 0 to skip): ";
+                getline(cin, newTitle);
+                trimString(newTitle);
+
+                if (newTitle == "0") {
+                    cout << "Skipping title update.\n";
+                    break;  // User skips updating title
+                }
+
+                if (!newTitle.empty()) {
+                    break;
+                }
+                cerr << "Error: Title cannot be empty. Please enter a valid title or leave blank to keep the current title.\n";
+            }
+
+            // Input validation for new plot
+            while (true) {
+                cout << "Enter new plot (leave empty to keep current, Enter 0 to skip): ";
+                getline(cin, newPlot);
+                trimString(newPlot);
+
+                if (newPlot == "0") {
+                    cout << "Skipping plot update.\n";
+                    break;  // User skips updating plot
+                }
+
+                if (!newPlot.empty()) {
+                    break;
+                }
+                cerr << "Error: Plot cannot be empty. Please enter a valid plot or leave blank to keep the current plot.\n";
+            }
+
+            // Input validation for release year
+            while (true) {
+                cout << "Enter new release year (enter 0 to keep current, Enter -1 to return to menu): ";
+                if (!(cin >> newReleaseYear) || (newReleaseYear != 0 && newReleaseYear != -1 && (newReleaseYear < 1888 || newReleaseYear > 2025))) {
+                    cerr << "Invalid Release Year. Please enter a valid year (1888-2025), 0 to keep current, or -1 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+
+                if (newReleaseYear == -1) {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+                break;
+            }
+
+            // Update movie details if necessary
             selectedMovie->updateDetails(newTitle, newPlot, newReleaseYear);
 
             movieTree.insert(selectedMovie);
-            cout << "\nMovie details updated successfully!" << endl;
+
+            cout << "\nMovie details updated successfully!\n";
 
             // Display updated movie details    
-            cout << "\nUpdated movie details:" << endl;
+            cout << "\nUpdated movie details:\n";
             cout << "- ID: " << selectedMovie->getId() << endl;
             cout << "- Title: " << selectedMovie->getTitle() << endl;
             cout << "- Plot: " << selectedMovie->getPlot() << endl;
@@ -394,17 +647,45 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             
         } else if (choice == 6) {
             int minAge, maxAge;
-            cout << "Enter the minimum age (x): ";
-            cin >> minAge;
-            cout << "Enter the maximum age (y): ";
-            cin >> maxAge;
-        
-            if (minAge > maxAge) {
-                cout << "Invalid range. Ensure that minimum age <= maximum age." << endl;
-                return;
+
+            // Input validation for minimum age
+            while (true) {
+                cout << "Enter the minimum age (Enter 0 to return to menu): ";
+                if (!(cin >> minAge) || minAge < 0) {
+                    cerr << "Invalid age. Please enter a positive integer or 0 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+                if (minAge == 0) {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+                break;
             }
-        
-            // Directly use AVL Tree to search and display actors
+
+            // Input validation for maximum age
+            while (true) {
+                cout << "Enter the maximum age (Enter 0 to return to menu): ";
+                if (!(cin >> maxAge) || maxAge < 0) {
+                    cerr << "Invalid age. Please enter a positive integer or 0 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+                if (maxAge == 0) {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+
+                if (minAge > maxAge) {
+                    cerr << "Invalid range. Ensure that minimum age <= maximum age.\n";
+                    continue;
+                }
+                break;
+            }
+
+            // Display actors in the specified age range
             actorTree.displayActorsInAgeRange(minAge, maxAge);
         } else if (choice == 7) {
             int currentYear = 2025;
@@ -414,95 +695,154 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             movieTree.displayMoviesInRange(pastyear, currentYear);
         } else if (choice == 8) {
             string actorName;
-            cout << "Enter Actor name: ";
-            cin.ignore();
-            getline(cin, actorName);  // Use getline to capture full actor name
-
             int matchCount;
-            Actor** actors = actorTable.searchByName(actorName, matchCount);
+            Actor** actors = nullptr;
 
-            if (!actors) {
-                cerr << "Error: Actor not found." << endl;
-                return;
+            // Flush input buffer
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            while (true) {
+                cout << "Enter Actor name (Enter 0 to return to menu): ";
+                
+                if (!getline(cin, actorName) || actorName.empty()) {
+                    cerr << "Error: Actor name cannot be empty. Please enter a valid name or enter 0 to return.\n";
+                    continue;
+                }
+
+                trimString(actorName);
+
+                if (actorName == "0") {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+
+                actors = actorTable.searchByName(actorName, matchCount);
+
+                if (actors && matchCount > 0) {
+                    break;  // **Exit loop when valid actor is found**
+                }
+
+                cerr << "Error: Actor not found. Please enter a valid name or enter 0 to return.\n";
             }
 
             // Display matched actors
-            cout << "Actors found:" << endl;
+            cout << "\nActors found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") "  <<"- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << ", BirthYear: " << actors[i]->getBirthYear() << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() 
+                    << ", Name: " << actors[i]->getName() 
+                    << ", BirthYear: " << actors[i]->getBirthYear() << endl;
             }
 
             // User selects an actor
             int choice;
-            cout << "Enter the number of the actor you want: ";
-            cin >> choice;
+            while (true) {
+                cout << "Enter the number of the actor you want (Enter 0 to return to menu): ";
+                if (!(cin >> choice) || choice < 0 || choice > matchCount) {
+                    cerr << "Invalid selection. Please enter a number between 1 and " << matchCount << " or enter 0 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
 
-            if (choice < 1 || choice > matchCount) {
-                cerr << "Invalid selection." << endl;
-                delete[] actors;
-                return;
+                if (choice == 0) {
+                    cout << "Returning to main menu.\n";
+                    delete[] actors;
+                    return;  // **Returns to menu instead of exiting**
+                }
+                break;
             }
 
             // Retrieve selected actor
             Actor* selectedActor = actors[choice - 1];
             delete[] actors;  // Free allocated memory
 
-            // Display movie details
-            cout << "\nActor details:" << endl;
+            // Display actor details
+            cout << "\nActor details:\n";
             cout << "- ID: " << selectedActor->getId() << endl;
             cout << "- Name: " << selectedActor->getName() << endl;
             cout << "- BirthYear: " << selectedActor->getBirthYear() << endl;
-
 
             // Get and display sorted movies for the selected actor
             int movieCount;
             Movie** sortedMovies = selectedActor->getSortedMovies(movieCount);
 
             if (movieCount == 0 || sortedMovies == nullptr) {
-                cout << "\nThis Actor has not act in a movie." << endl;
-            } else{
-                cout << "\nMovies starring " << selectedActor->getName() << " (sorted alphabetically):" << endl;
+                cout << "\nThis Actor has not acted in any movies.\n";
+            } else {
+                cout << "\nMovies starring " << selectedActor->getName() << " (sorted alphabetically):\n";
                 for (int i = 0; i < movieCount; ++i) {
-                    cout << "- ID: " << sortedMovies[i]->getId() << ", Title: " << sortedMovies[i]->getTitle() << ", Year: " << sortedMovies[i]->getReleaseYear() << endl;
+                    cout << "- ID: " << sortedMovies[i]->getId() 
+                        << ", Title: " << sortedMovies[i]->getTitle() 
+                        << ", Year: " << sortedMovies[i]->getReleaseYear() << endl;
                 }
                 delete[] sortedMovies; // Free allocated memory
+                sortedMovies = nullptr;
             }
         } else if (choice == 9) {
             string movieName;
-            cout << "Enter Movie name: ";
-            cin.ignore();
-            getline(cin, movieName);  // Use getline to capture full movie name
-
             int matchCount;
-            Movie** movies = movieTable.searchByTitle(movieName, matchCount);
+            Movie** movies = nullptr;
 
-            if (!movies) {
-                cerr << "Error: Movie not found." << endl;
-                return;
+            // Flush input buffer
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            while (true) {
+                cout << "Enter Movie name (Enter 0 to return to menu): ";
+                
+                if (!getline(cin, movieName) || movieName.empty()) {
+                    cerr << "Error: Movie name cannot be empty. Please enter a valid name or enter 0 to return.\n";
+                    continue;
+                }
+
+                trimString(movieName);
+
+                if (movieName == "0") {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+
+                movies = movieTable.searchByTitle(movieName, matchCount);
+
+                if (movies && matchCount > 0) {
+                    break;  // **Exit loop when valid movie is found**
+                }
+
+                cerr << "Error: Movie not found. Please enter a valid name or enter 0 to return.\n";
             }
 
             // Display matched movies
-            cout << "Movies found:" << endl;
+            cout << "\nMovies found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << ", Year: " << movies[i]->getReleaseYear() << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() 
+                    << ", Title: " << movies[i]->getTitle() 
+                    << ", Year: " << movies[i]->getReleaseYear() << endl;
             }
 
             // User selects a movie
             int choice;
-            cout << "Enter the number of the movie you want: ";
-            cin >> choice;
+            while (true) {
+                cout << "Enter the number of the movie you want (Enter 0 to return to menu): ";
+                if (!(cin >> choice) || choice < 0 || choice > matchCount) {
+                    cerr << "Invalid selection. Please enter a number between 1 and " << matchCount << " or enter 0 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
 
-            if (choice < 1 || choice > matchCount) {
-                cerr << "Invalid selection." << endl;
-                delete[] movies;
-                return;
+                if (choice == 0) {
+                    cout << "Returning to main menu.\n";
+                    delete[] movies;
+                    return;  // **Returns to menu instead of exiting**
+                }
+                break;
             }
 
             // Retrieve selected movie
             Movie* selectedMovie = movies[choice - 1];
             delete[] movies;  // Free allocated memory
+
             // Display movie details
-            cout << "\nMovie details:" << endl;
+            cout << "\nMovie details:\n";
             cout << "- ID: " << selectedMovie->getId() << endl;
             cout << "- Title: " << selectedMovie->getTitle() << endl;
             cout << "- Year: " << selectedMovie->getReleaseYear() << endl;
@@ -511,224 +851,401 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Get and display sorted actors in the selected movie
             int actorCount;
             Actor** sortedActors = selectedMovie->getSortedActors(actorCount);
+
             if (actorCount == 0 || sortedActors == nullptr) {
-                cout << "\nThis movie has no actors recorded." << endl;
+                cout << "\nThis movie has no actors recorded.\n";
             } else {
-                cout << "\nActors in the movie \"" << selectedMovie->getTitle() << "\" (sorted alphabetically):" << endl;
+                cout << "\nActors in the movie \"" << selectedMovie->getTitle() << "\" (sorted alphabetically):\n";
                 for (int i = 0; i < actorCount; ++i) {
                     cout << "- ID: " << sortedActors[i]->getId() 
                         << ", Name: " << sortedActors[i]->getName() << endl;
                 }
                 delete[] sortedActors; // Free allocated memory
+                sortedActors = nullptr;
             }
-
-            delete[] sortedActors; // Free allocated memory
         } else if (choice == 10) {
-            // Search for an actor by name instead of ID
-           string actorName;
-           cout << "Enter Actor Name: ";
-           cin.ignore();
-           getline(cin, actorName);
-
-           int matchCount;
-           Actor** actors = actorTable.searchByName(actorName, matchCount);
-
-           if (!actors) {
-               cerr << "Error: Actor not found." << endl;
-               return;
-           }
-
-           // Display matched actors
-           cout << "\nActors found:\n";
-           for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << ", BirthYear: " << actors[i]->getBirthYear() << endl;
-           }
-
-           // User selects an actor
-           int choice;
-           cout << "Enter the number of the actor you want: ";
-           cin >> choice;
-
-           if (choice < 1 || choice > matchCount) {
-               cerr << "Invalid selection." << endl;
-               delete[] actors;
-               return;
-           }
-
-           // Retrieve selected actor
-           Actor* selectedActor = actors[choice - 1];
-           delete[] actors;  // Free allocated memory
-
-            // Display known actors
-            actorGraph.displayConnections(selectedActor);
-        } else if (choice == 11) {
-           // Update actor rating using actor name search
-           string actorName;
-           cout << "\nEnter Actor Name: ";
-           cin.ignore();  // Clear input buffer
-           getline(cin, actorName);  // Allow full actor name input
-
-           int matchCount;
-           Actor** actors = actorTable.searchByName(actorName, matchCount);
-
-           if (!actors) {
-               cerr << "Error: Actor not found." << endl;
-               return;
-           }
-
-           // Display matched actors
-           cout << "\nActors found:\n";
-           for (int i = 0; i < matchCount; ++i) {
-               cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << ", BirthYear: " << actors[i]->getBirthYear() << endl;
-           }
-
-           // Let user pick an actor from the list
-           int choice;
-           cout << "Enter the number of the actor you want to update: ";
-           cin >> choice;
-
-           if (choice < 1 || choice > matchCount) {
-               cerr << "Invalid selection." << endl;
-               delete[] actors;
-               return;
-           }
-
-           // Retrieve selected actor
-           Actor* selectedActor = actors[choice - 1];
-           delete[] actors;  // Free allocated memory
-
-           // Ask for new rating
-           float newRating;
-           cout << "Enter new rating (0.0 to 10.0): ";
-           cin >> newRating;
-           selectedActor->setRating(newRating);
-
-           cout << "\nRating updated successfully for " << selectedActor->getName() << "!" << endl;
-        }  else if (choice == 12) {
-           // Update movie rating using movie title search
-           string movieTitle;
-           cout << "\nEnter Movie Title: ";
-           cin.ignore();  // Clear input buffer
-           getline(cin, movieTitle);  // Allow full movie title input
-
-           int matchCount;
-           Movie** movies = movieTable.searchByTitle(movieTitle, matchCount);
-
-           if (!movies) {
-               cerr << "Error: Movie not found." << endl;
-               return;
-           }
-
-           // Display matched movies
-           cout << "\nMovies found:\n";
-           for (int i = 0; i < matchCount; ++i) {
-               cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << ", Year: " << movies[i]->getReleaseYear() << endl;
-           }
-
-           // Let user pick a movie from the list
-           int choice;
-           cout << "Enter the number of the movie you want to update: ";
-           cin >> choice;
-
-           if (choice < 1 || choice > matchCount) {
-               cerr << "Invalid selection." << endl;
-               delete[] movies;
-               return;
-           }
-
-           // Retrieve selected movie
-           Movie* selectedMovie = movies[choice - 1];
-           delete[] movies;  // Free allocated memory
-
-           // Ask for new rating
-           float newRating;
-           cout << "Enter new rating (0.0 to 10.0): ";
-           cin >> newRating;
-           selectedMovie->setRating(newRating);
-
-           cout << "\nRating updated successfully for \"" << selectedMovie->getTitle() << "\"!" << endl;
-        } else if (choice == 13) {
             string actorName;
-            cout << "Enter Actor name: ";
-            cin.ignore();
-            getline(cin, actorName);  // Use getline to capture full actor name
-
             int matchCount;
-            Actor** actors = actorTable.searchByName(actorName, matchCount);
+            Actor** actors = nullptr;
 
-            if (!actors) {
-                cerr << "Error: Actor not found." << endl;
-                return;
+            // Flush input buffer
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            while (true) {
+                cout << "Enter Actor Name (Enter 0 to return to menu): ";
+                
+                if (!getline(cin, actorName) || actorName.empty()) {
+                    cerr << "Error: Actor name cannot be empty. Please enter a valid name or enter 0 to return.\n";
+                    continue;
+                }
+
+                trimString(actorName);
+
+                if (actorName == "0") {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+
+                actors = actorTable.searchByName(actorName, matchCount);
+
+                if (actors && matchCount > 0) {
+                    break;  // **Exit loop when valid actor is found**
+                }
+
+                cerr << "Error: Actor not found. Please enter a valid name or enter 0 to return.\n";
             }
 
             // Display matched actors
-            cout << "Actors found:" << endl;
+            cout << "\nActors found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << ", BirthYear: " << actors[i]->getBirthYear() << ", Rating: " << actors[i]->getRating() << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() 
+                    << ", Name: " << actors[i]->getName() 
+                    << ", BirthYear: " << actors[i]->getBirthYear() << endl;
             }
 
             // User selects an actor
             int choice;
-            cout << "Enter the number of the actor you want: ";
-            cin >> choice;
+            while (true) {
+                cout << "Enter the number of the actor you want (Enter 0 to return to menu): ";
+                if (!(cin >> choice) || choice < 0 || choice > matchCount) {
+                    cerr << "Invalid selection. Please enter a number between 1 and " << matchCount << " or enter 0 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
 
-            if (choice < 1 || choice > matchCount) {
-                cerr << "Invalid selection." << endl;
-                delete[] actors;
-                return;
+                if (choice == 0) {
+                    cout << "Returning to main menu.\n";
+                    delete[] actors;
+                    return;  // **Returns to menu instead of exiting**
+                }
+                break;
             }
 
             // Retrieve selected actor
             Actor* selectedActor = actors[choice - 1];
             delete[] actors;  // Free allocated memory
 
-            // Display movie details
+            // Display known actors
+            actorGraph.displayConnections(selectedActor);
+        } else if (choice == 11) {
+           string actorName;
+            int matchCount;
+            Actor** actors = nullptr;
+
+            // Flush input buffer
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            while (true) {
+                cout << "Enter Actor Name (Enter 0 to return to menu): ";
+                
+                if (!getline(cin, actorName) || actorName.empty()) {
+                    cerr << "Error: Actor name cannot be empty. Please enter a valid name or enter 0 to return.\n";
+                    continue;
+                }
+
+                trimString(actorName);
+
+                if (actorName == "0") {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+
+                actors = actorTable.searchByName(actorName, matchCount);
+
+                if (actors && matchCount > 0) {
+                    break;  // **Exit loop when valid actor is found**
+                }
+
+                cerr << "Error: Actor not found. Please enter a valid name or enter 0 to return.\n";
+            }
+
+            // Display matched actors
+            cout << "\nActors found:\n";
+            for (int i = 0; i < matchCount; ++i) {
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() 
+                    << ", Name: " << actors[i]->getName() 
+                    << ", BirthYear: " << actors[i]->getBirthYear() << endl;
+            }
+
+            // User selects an actor
+            int choice;
+            while (true) {
+                cout << "Enter the number of the actor you want to update (Enter 0 to return to menu): ";
+                if (!(cin >> choice) || choice < 0 || choice > matchCount) {
+                    cerr << "Invalid selection. Please enter a number between 1 and " << matchCount << " or enter 0 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+
+                if (choice == 0) {
+                    cout << "Returning to main menu.\n";
+                    delete[] actors;
+                    return;  // **Returns to menu instead of exiting**
+                }
+                break;
+            }
+
+            // Retrieve selected actor
+            Actor* selectedActor = actors[choice - 1];
+            delete[] actors;  // Free allocated memory
+
+            // Ask for new rating
+            float newRating;
+            while (true) {
+                cout << "Enter new rating (0.0 to 10.0, Enter -1 to return to menu): ";
+                if (!(cin >> newRating) || newRating < -1.0 || newRating > 10.0) {
+                    cerr << "Invalid rating. Please enter a value between 0.0 and 10.0 or enter -1 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+
+                if (newRating == -1.0) {
+                    cout << "Returning to main menu.\n";
+                    return;
+                }
+                break;
+            }
+
+            // Set the new rating
+            selectedActor->setRating(newRating);
+
+            cout << "\nRating updated successfully for " << selectedActor->getName() << "!" << endl;
+        }  else if (choice == 12) {
+            // Update movie rating using movie title search
+            string movieTitle;
+            int matchCount;
+            Movie** movies = nullptr;
+
+            // Flush input buffer
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            while (true) {
+                cout << "Enter Movie Title (Enter 0 to return to menu): ";
+                
+                if (!getline(cin, movieTitle) || movieTitle.empty()) {
+                    cerr << "Error: Movie title cannot be empty. Please enter a valid title or enter 0 to return.\n";
+                    continue;
+                }
+
+                trimString(movieTitle);
+
+                if (movieTitle == "0") {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+
+                movies = movieTable.searchByTitle(movieTitle, matchCount);
+
+                if (movies && matchCount > 0) {
+                    break;  // **Exit loop when valid movie is found**
+                }
+
+                cerr << "Error: Movie not found. Please enter a valid title or enter 0 to return.\n";
+            }
+
+            // Display matched movies
+            cout << "\nMovies found:\n";
+            for (int i = 0; i < matchCount; ++i) {
+                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() 
+                    << ", Title: " << movies[i]->getTitle() 
+                    << ", Year: " << movies[i]->getReleaseYear() << endl;
+            }
+
+            // User selects a movie
+            int choice;
+            while (true) {
+                cout << "Enter the number of the movie you want to update (Enter 0 to return to menu): ";
+                if (!(cin >> choice) || choice < 0 || choice > matchCount) {
+                    cerr << "Invalid selection. Please enter a number between 1 and " << matchCount << " or enter 0 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+
+                if (choice == 0) {
+                    cout << "Returning to main menu.\n";
+                    delete[] movies;
+                    return;  // **Returns to menu instead of exiting**
+                }
+                break;
+            }
+
+            // Retrieve selected movie
+            Movie* selectedMovie = movies[choice - 1];
+            delete[] movies;  // Free allocated memory
+
+            // Ask for new rating
+            float newRating;
+            while (true) {
+                cout << "Enter new rating (0.0 to 10.0, Enter -1 to return to menu): ";
+                if (!(cin >> newRating) || newRating < -1.0 || newRating > 10.0) {
+                    cerr << "Invalid rating. Please enter a value between 0.0 and 10.0 or enter -1 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+
+                if (newRating == -1.0) {
+                    cout << "Returning to main menu.\n";
+                    return;
+                }
+                break;
+            }
+
+            // Set the new rating
+            selectedMovie->setRating(newRating);
+
+            cout << "\nRating updated successfully for \"" << selectedMovie->getTitle() << "\"!" << endl;
+        } else if (choice == 13) {
+            string actorName;
+            int matchCount;
+            Actor** actors = nullptr;
+
+            // Flush input buffer
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            while (true) {
+                cout << "Enter Actor name (Enter 0 to return to menu): ";
+
+                if (!getline(cin, actorName) || actorName.empty()) {
+                    cerr << "Error: Actor name cannot be empty. Please enter a valid name or enter 0 to return.\n";
+                    continue;
+                }
+
+                trimString(actorName);
+
+                if (actorName == "0") {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+
+                actors = actorTable.searchByName(actorName, matchCount);
+
+                if (actors && matchCount > 0) {
+                    break;  // **Exit loop when valid actor is found**
+                }
+
+                cerr << "Error: Actor not found. Please enter a valid name or enter 0 to return.\n";
+            }
+
+            // Display matched actors
+            cout << "\nActors found:\n";
+            for (int i = 0; i < matchCount; ++i) {
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() 
+                    << ", Name: " << actors[i]->getName() 
+                    << ", BirthYear: " << actors[i]->getBirthYear() 
+                    << ", Rating: " << actors[i]->getRating() << endl;
+            }
+
+            // User selects an actor
+            int choice;
+            while (true) {
+                cout << "Enter the number of the actor you want (Enter 0 to return to menu): ";
+                if (!(cin >> choice) || choice < 0 || choice > matchCount) {
+                    cerr << "Invalid selection. Please enter a number between 1 and " << matchCount << " or enter 0 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+
+                if (choice == 0) {
+                    cout << "Returning to main menu.\n";
+                    delete[] actors;
+                    return;  // **Returns to menu instead of exiting**
+                }
+                break;
+            }
+
+            // Retrieve selected actor
+            Actor* selectedActor = actors[choice - 1];
+            delete[] actors;  // Free allocated memory
+
+            // Display actor details
             cout << "\nActor details:" << endl;
             cout << "- ID: " << selectedActor->getId() << endl;
             cout << "- Name: " << selectedActor->getName() << endl;
             cout << "- BirthYear: " << selectedActor->getBirthYear() << endl;
             cout << "- Rating: " << selectedActor->getRating() << endl;
 
-
-            // Get and display sorted actors in the selected movie
+            // Get and display sorted movies by rating
             int movieCount;
             Movie** sortedMovies = selectedActor->sortMoviesByRating(movieCount);
 
-            cout << "\nMovies starring " << selectedActor->getName() << " (Sorted by Rating):" << endl;
-            for (int i = 0; i < movieCount; ++i) {
-                cout << "- ID: " << sortedMovies[i]->getId() << ", Title: " << sortedMovies[i]->getTitle() << " Year: " << sortedMovies[i]->getReleaseYear() << ", Rating: " << sortedMovies[i]->getRating() << endl;
+            if (movieCount == 0 || sortedMovies == nullptr) {
+                cout << "\nThis actor has not acted in any movie." << endl;
+            } else {
+                cout << "\nMovies starring " << selectedActor->getName() << " (Sorted by Rating):" << endl;
+                for (int i = 0; i < movieCount; ++i) {
+                    cout << "- ID: " << sortedMovies[i]->getId() 
+                        << ", Title: " << sortedMovies[i]->getTitle() 
+                        << ", Year: " << sortedMovies[i]->getReleaseYear() 
+                        << ", Rating: " << sortedMovies[i]->getRating() << endl;
+                }
+                delete[] sortedMovies; // Free allocated memory
+                sortedMovies = nullptr;
             }
-
-            delete[] sortedMovies; // Free allocated memory
+            
         } else if (choice == 14) {
             string movieName;
-            cout << "Enter Movie name: ";
-            cin.ignore();
-            getline(cin, movieName);  // Use getline to capture full movie name
-
             int matchCount;
-            Movie** movies = movieTable.searchByTitle(movieName, matchCount);
+            Movie** movies = nullptr;
 
-            if (!movies) {
-                cerr << "Error: Movie not found." << endl;
-                return;
+            // Flush input buffer
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            while (true) {
+                cout << "Enter Movie name (Enter 0 to return to menu): ";
+
+                if (!getline(cin, movieName) || movieName.empty()) {
+                    cerr << "Error: Movie name cannot be empty. Please enter a valid name or enter 0 to return.\n";
+                    continue;
+                }
+
+                trimString(movieName);
+
+                if (movieName == "0") {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+
+                movies = movieTable.searchByTitle(movieName, matchCount);
+
+                if (movies && matchCount > 0) {
+                    break;  // **Exit loop when valid movie is found**
+                }
+
+                cerr << "Error: Movie not found. Please enter a valid name or enter 0 to return.\n";
             }
 
             // Display matched movies
-            cout << "Movies found:" << endl;
+            cout << "\nMovies found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << ", Year: " << movies[i]->getReleaseYear() << ", Rating: " << movies[i]->getRating() << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId()
+                    << ", Title: " << movies[i]->getTitle()
+                    << ", Year: " << movies[i]->getReleaseYear()
+                    << ", Rating: " << movies[i]->getRating() << endl;
             }
 
             // User selects a movie
             int choice;
-            cout << "Enter the number of the movie you want: ";
-            cin >> choice;
+            while (true) {
+                cout << "Enter the number of the movie you want (Enter 0 to return to menu): ";
+                if (!(cin >> choice) || choice < 0 || choice > matchCount) {
+                    cerr << "Invalid selection. Please enter a number between 1 and " << matchCount << " or enter 0 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
 
-            if (choice < 1 || choice > matchCount) {
-                cerr << "Invalid selection." << endl;
-                delete[] movies;
-                return;
+                if (choice == 0) {
+                    cout << "Returning to main menu.\n";
+                    delete[] movies;
+                    return;  // **Returns to menu instead of exiting**
+                }
+                break;
             }
 
             // Retrieve selected movie
@@ -743,48 +1260,116 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             cout << "- Plot: " << selectedMovie->getPlot() << endl;
             cout << "- Rating: " << selectedMovie->getRating() << endl;
 
-            // Get and display sorted actors in the selected movie
+            // Get and display sorted actors by rating
             int actorCount;
             Actor** sortedActors = selectedMovie->sortActorsByRating(actorCount);
 
             if (actorCount == 0 || sortedActors == nullptr) {
                 cout << "\nThis movie has no actors recorded." << endl;
-            } else{
-                cout << "Actors in the movie \"" << selectedMovie->getTitle() << "\" (Sorted by Rating):" << endl;
+            } else {
+                cout << "\nActors in the movie \"" << selectedMovie->getTitle() << "\" (Sorted by Rating): " << endl;
                 for (int i = 0; i < actorCount; ++i) {
-                    cout << "(" << i + 1 << ") " << "- ID: " << sortedActors[i]->getId() << ", Name: " << sortedActors[i]->getName() << ", BirthYear: " << sortedActors[i]->getBirthYear() << ", Rating: " << sortedActors[i]->getRating() << endl;
+                    cout << "(" << i + 1 << ") " << "- ID: " << sortedActors[i]->getId()
+                        << ", Name: " << sortedActors[i]->getName()
+                        << ", BirthYear: " << sortedActors[i]->getBirthYear()
+                        << ", Rating: " << sortedActors[i]->getRating() << endl;
                 }
-
                 delete[] sortedActors; // Free allocated memory
             }
         } else if (choice == 15) {
             float minRating;
-            cout << "Enter minimum movie rating: ";
-            cin >> minRating;
-            
+            // Input validation for minimum rating
+            while (true) {
+                cout << "Enter minimum movie rating (0.0 to 10.0, Enter -1 to return to menu): ";
+
+                if (!(cin >> minRating)) {
+                    cerr << "Invalid input. Please enter a number between 0.0 and 10.0 or enter -1 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+
+                if (minRating == -1) {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+
+                if (minRating < 0.0 || minRating > 10.0) {
+                    cerr << "Invalid rating. Please enter a number between 0.0 and 10.0.\n";
+                    continue;
+                }
+
+                break;  // Valid rating input, exit loop
+            }
+
+            // Allocate memory for movie storage
             recentMovies = new Movie*[movieTable.getSize()];
             movieCount = 0;
-            
+
+            // Collect all movies into the array
             movieTable.display(collectAllMovies);
-            
+
+            if (movieCount == 0) {
+                cout << "\nNo movies found in the database.\n";
+                delete[] recentMovies;
+                return;  // **Return to menu instead of exiting**
+            }
+
+            // Filter and recommend movies based on the rating
             Movie tempMovie;  // Temporary object to call the recommendation method
             tempMovie.recommendMoviesByRating(recentMovies, movieCount, minRating);
-            
-            delete[] recentMovies;            
+
+            // Free allocated memory
+            delete[] recentMovies;
+            recentMovies = nullptr;         
             
         
         } else if (choice == 16) {
             float minRating;
-            cout << "Enter minimum actor rating: ";
-            cin >> minRating;
+            // Input validation for minimum actor rating
+            while (true) {
+                cout << "Enter minimum actor rating (0.0 to 10.0, Enter -1 to return to menu): ";
 
+                if (!(cin >> minRating)) {
+                    cerr << "Invalid input. Please enter a number between 0.0 and 10.0 or enter -1 to return.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
+                }
+
+                if (minRating == -1) {
+                    cout << "Returning to main menu.\n";
+                    return;  // **Returns to menu instead of exiting**
+                }
+
+                if (minRating < 0.0 || minRating > 10.0) {
+                    cerr << "Invalid rating. Please enter a number between 0.0 and 10.0.\n";
+                    continue;
+                }
+
+                break;  // Valid rating input, exit loop
+            }
+
+            // Allocate memory for actor storage
             allActors = new Actor*[actorTable.getSize()];
             totalActors = 0;
 
-            actorTable.display(collectActors); // Collect all actors into allActors array
+            // Collect all actors into the array
+            actorTable.display(collectActors);
 
+            if (totalActors == 0) {
+                cout << "\nNo actors found in the database.\n";
+                delete[] allActors;
+                return;  // **Return to menu instead of exiting**
+            }
+
+            // Filter and recommend actors based on the rating
             Actor tempActor;  // Temporary object to call the method
             tempActor.recommendActorsByRating(allActors, totalActors, minRating);
+
+            // Free allocated memory
+            delete[] allActors;
+            allActors = nullptr;
            
         } else if (choice == 0) {
             // Exit
