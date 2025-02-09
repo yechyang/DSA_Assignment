@@ -96,62 +96,31 @@ Actor** Movie::getSortedActors(int& count) const {
     return actorArray;
 }
 
+// Insertion Sort for Actors by Rating
+void Movie::insertionSortActorsByRating(Actor** actors, int count) const {
+    for (int i = 1; i < count; ++i) {
+        Actor* key = actors[i];
+        int j = i - 1;
 
-
-// Merge function for sorting movies by rating
-void Movie::mergeByRating(Movie** movies, int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
-
-    // Temporary arrays
-    Movie** leftArray = new Movie*[n1];
-    Movie** rightArray = new Movie*[n2];
-
-    // Copy data to temp arrays
-    for (int i = 0; i < n1; ++i) leftArray[i] = movies[left + i];
-    for (int j = 0; j < n2; ++j) rightArray[j] = movies[mid + 1 + j];
-
-    int i = 0, j = 0, k = left;
-
-    // Merge the arrays by rating in **descending** order
-    while (i < n1 && j < n2) {
-        if (leftArray[i]->getRating() >= rightArray[j]->getRating()) {
-            movies[k++] = leftArray[i++];
-        } else {
-            movies[k++] = rightArray[j++];
+        // Move elements that have a LOWER rating forward (higher ratings on top)
+        while (j >= 0 && actors[j]->getRating() < key->getRating()) {
+            actors[j + 1] = actors[j];
+            j = j - 1;
         }
-    }
-
-    // Copy remaining elements
-    while (i < n1) movies[k++] = leftArray[i++];
-    while (j < n2) movies[k++] = rightArray[j++];
-
-    // Free memory
-    delete[] leftArray;
-    delete[] rightArray;
-}
-
-// Merge Sort function for sorting movies by rating
-void Movie::mergeSortByRating(Movie** movies, int left, int right) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
-
-        // Sort both halves
-        mergeSortByRating(movies, left, mid);
-        mergeSortByRating(movies, mid + 1, right);
-
-        // Merge the sorted halves
-        mergeByRating(movies, left, mid, right);
+        actors[j + 1] = key;
     }
 }
 
-// **Updated Sorting Function (Using Merge Sort)**
-Movie** Movie::sortMoviesByRating(Movie** movies, int count) const {
-    if (count > 1) {
-        mergeSortByRating(movies, 0, count - 1);
-    }
-    return movies; // Return sorted array
+Actor** Movie::sortActorsByRating(int& count) const {
+    Actor** actorArray = actors.toArray(count);
+    if (count == 0) return nullptr;
+
+    // Sort by rating (descending order)
+    insertionSortActorsByRating(actorArray, count);
+
+    return actorArray;
 }
+
 
 // Insertion Sort for Movies by Rating
 void Movie::insertionSortMoviesByRating(Movie** movies, int count) const {

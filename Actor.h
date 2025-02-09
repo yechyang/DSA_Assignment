@@ -18,9 +18,7 @@ private:
     // Merge sort utilities
     static void mergeSort(Actor** actors, int left, int right);
     static void merge(Actor** actors, int left, int mid, int right);
-    static void mergeByRating(Actor** actors, int left, int mid, int right);
-    static void mergeSortByRating(Actor** actors, int left, int right);
-
+    
 public:
     // Constructor
     Actor(const int& id = 0, const string& name = "", int birthYear = 0);
@@ -53,7 +51,10 @@ public:
     Movie** getSortedMovies(int& count) const;
 
     // Sorting actors
-    Actor** sortActorsByRating(Actor** actors, int count) const;
+
+
+    Movie** sortMoviesByRating(int& count) const;
+    void insertionSortMoviesByRating(Movie** movies, int count) const;
 
     // Display functions
     void display() const;
