@@ -6,6 +6,7 @@
 #include "Actor.h"
 #include "Movie.h"
 #include "Graph.h"
+#include <limits>
 #include <ctime>
 
 using namespace std;
@@ -502,7 +503,6 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             } else {
                 cerr << "Error: Actor is already associated with this movie." << endl;
             }
-        
         } else if (choice == 4) {
             // Update actor details by searching for name
             string actorName;

@@ -16,24 +16,50 @@ private:
 
     // **Structure for each actor node in the graph**
     struct ActorNode {
-        Actor* actor;  // Store pointer to Actor instead of just ID
-        ListNode* head;  // Head of adjacency list (co-actors)
-        ActorNode* next; // Pointer to the next actor in the graph
+        Actor* actor;
+        ListNode* head;
+        ActorNode* next;
     
         ActorNode(Actor* actorPtr) : actor(actorPtr), head(nullptr), next(nullptr) {}
     };    
 
-    ActorNode* actorList; // **Head of actor nodes in the graph**
+    ActorNode* actorList;
 
-    // **Helper function to find an actor node**
+    // **Finds an actor node by ID**
+    // Searches for an actor in the graph.
+    // Pre-condition: Actor ID must be valid.
+    // Post-condition: Returns the ActorNode if found, otherwise returns nullptr.
     ActorNode* findActor(int actorId);
 
 public:
+    // **Constructor**
+    // Purpose: Initializes an empty graph.
+    // Pre-condition: None.
+    // Post-condition: The graph is initialized with an empty actor list.
     Graph();
+
+    // **Destructor**
+    // Purpose: Cleans up memory by deleting all actors and their connections.
+    // Pre-condition: Graph must exist.
+    // Post-condition: All allocated memory for actors and their connections is freed.
     ~Graph();
 
+    // **Adds an actor to the graph**
+    // Purpose: Inserts an actor into the graph if they do not already exist.
+    // Pre-condition: Actor pointer must be valid.
+    // Post-condition: The actor is added to the graph.
     void addActor(Actor* actor);
+
+    // **Adds a connection between two actors**
+    // Purpose: Establishes a collaboration between two actors.
+    // Pre-condition: Both actors must exist in the graph.
+    // Post-condition: A bidirectional connection is created between the two actors.
     void addConnection(int actor1, int actor2);
+
+    // **Displays all connections of an actor**
+    // Purpose: Lists all co-actors of a given actor.
+    // Pre-condition: The actor must exist in the graph.
+    // Post-condition: Prints all co-actors at first and second levels.
     void displayConnections(Actor* actor);
 };
 
