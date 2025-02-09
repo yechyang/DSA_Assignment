@@ -1489,12 +1489,12 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
 // Function to compute the key for actor sorting
 int computeActorKey(Actor* actor) {
-    return ((2025 - actor->getBirthYear()) * 10000000) + actor->getId();
+    return ((2025 - actor->getBirthYear()) * 10000) + (actor->getId() % 10000);
 }
 
 // Function to compute the key for movie sorting
 int computeMovieKey(Movie* movie) {
-    return movie->getReleaseYear() * 10000000 + movie->getId();
+    return (movie->getReleaseYear() * 10000) + (movie->getId() % 10000);
 }
 // Main function
 int main() {

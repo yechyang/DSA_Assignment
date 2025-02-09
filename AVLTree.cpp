@@ -245,17 +245,17 @@ void AVLTree<Movie>::displayMoviesInRange(AVLNode<Movie>* node, int minYear, int
 
     int movieYear = node->data->getReleaseYear();
 
-    // 🔥 Ensure correct traversal for all cases
-    if (movieYear >= minYear)  // 🔄 Move left to check for earlier years (including minYear)
+    // Ensure correct traversal for all cases
+    if (movieYear >= minYear)  // Move left to check for earlier years (including minYear)
         displayMoviesInRange(node->left, minYear, maxYear);
 
-    if (movieYear >= minYear && movieYear <= maxYear) {  // ✅ Print movies inside the range
+    if (movieYear >= minYear && movieYear <= maxYear) {  // Print movies inside the range
         std::cout << "Movie ID: " << node->data->getId()
                   << ", Title: " << node->data->getTitle()
                   << ", Release Year: " << movieYear << std::endl;
     }
 
-    if (movieYear <= maxYear)  // 🔄 Move right to check for later years (including maxYear)
+    if (movieYear <= maxYear)  // Move right to check for later years (including maxYear)
         displayMoviesInRange(node->right, minYear, maxYear);
 }
 
