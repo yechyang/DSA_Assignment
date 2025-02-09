@@ -43,7 +43,6 @@ public:
     void insert(T* data);
     void remove(T* data);
     void update(T* oldData, T* newData);
-
     // void displayAll();
 
     void displayActorsInAgeRange(int minAge, int maxAge);

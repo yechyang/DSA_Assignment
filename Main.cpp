@@ -26,20 +26,21 @@ void skipHeader(ifstream& file) {
 }
 
 // Function to load actors from a CSV file
-void loadActors(const string& filename, Dictionary<Actor>& actorTable,AVLTree<Actor>& actorTree, Graph& actorGraph) {
+void loadActors(const string& filename, Dictionary<Actor>& actorTable, AVLTree<Actor>& actorTree, Graph& actorGraph) {
     ifstream file(filename);
     if (!file.is_open()) {
         cerr << "Error opening " << filename << endl;
         return;
     }
 
-    skipHeader(file); // Skip the header row
+    skipHeader(file);
+    int count = 0;
 
     string line, id, name, birthYear;
     while (getline(file, line)) {
         stringstream ss(line);
         getline(ss, id, ',');
-        getline(ss, name, ',');   // Name may have double quotes
+        getline(ss, name, ',');
         getline(ss, birthYear);
 
         int year = safeStoi(birthYear);
@@ -53,17 +54,21 @@ void loadActors(const string& filename, Dictionary<Actor>& actorTable,AVLTree<Ac
             name = name.substr(1, name.length() - 2);
         }
 
-        cout << "Loaded Actor: [" << name << "]" << endl;
-
         actorTable.insert(intId, Actor(intId, name, year));
         Actor* actorPtr = actorTable.search(intId);
+
         if (actorPtr) {
+            // 🔥 Ensure AVL tree gets a VALID pointer
             actorTree.insert(actorPtr);
+            count++;
+        } else {
+            cerr << "Error: Actor insertion failed!" << endl;
         }
     }
 
     file.close();
     cout << "Actors loaded from " << filename << endl;
+    cout << "Actors loaded: " << count << " from " << filename << endl;
 }
 
 // Function to load movies from a CSV file
@@ -95,8 +100,6 @@ void loadMovies(const string& filename, Dictionary<Movie>& movieTable,AVLTree<Mo
 
         Movie movie(intId, title, plot, year);
         movieTable.insert(intId, movie);
-
-        std::cout << "Loading Movie: " << title << " (" << year << ")" << std::endl;
 
         Movie* moviePtr = movieTable.search(intId);
         if (moviePtr) {
@@ -500,9 +503,6 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             int currentYear = 2025;
             int pastyear = currentYear - 3;
 
-            std::cout << "\nAll Movies in AVL Tree (Sorted by Year & ID):\n";
-            movieTree.displayAllMovies();
-
             cout << "\nMovies released in the past 3 years (sorted by year):\n";
             movieTree.displayMoviesInRange(pastyear, currentYear);
         } else if (choice == 11) {
@@ -679,36 +679,18 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             recentMovies = nullptr;
         } else if (choice == 16) {
 
-            int subChoice;
-            cout << "\nRecommendation Options:\n";
-            cout << "1. Recommend by Minimum Rating\n";
-            cout << "2. Recommend by Year\n";
-            cout << "Enter your choice: ";
-            cin >> subChoice;
-
+            float minRating;
+            cout << "Enter minimum movie rating: ";
+            cin >> minRating;
+            
             recentMovies = new Movie*[movieTable.getSize()];
             movieCount = 0;
-
+            
             movieTable.display(collectAllMovies);
-
+            
             Movie tempMovie;  // Temporary object to call the recommendation methods
-
-            if (subChoice == 1) {
-                float minRating;
-                cout << "Enter minimum movie rating: ";
-                cin >> minRating;
-                tempMovie.recommendMoviesByRating(recentMovies, movieCount, minRating);
-            } 
-            else if (subChoice == 2) {
-                int year;
-                cout << "Enter the year: ";
-                cin >> year;
-                tempMovie.recommendMoviesByYear(recentMovies, movieCount, year);
-            } 
-            else {
-                cout << "Invalid choice!" << endl;
-            }
-
+            tempMovie.recommendMoviesByRating(recentMovies, movieCount, minRating);
+            
             delete[] recentMovies;  // Free allocated memory
         } else if (choice == 17) {
             float minRating;
@@ -730,18 +712,18 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
 // Function to compute the key for actor sorting
 int computeActorKey(Actor* actor) {
-    return (2025 - actor->getBirthYear()) * 1000000 + actor->getId();
+    return ((2025 - actor->getBirthYear()) * 10000000) + actor->getId();
 }
 
 // Function to compute the key for movie sorting
 int computeMovieKey(Movie* movie) {
-    return movie->getReleaseYear() * 1000000 + movie->getId();
+    return movie->getReleaseYear() * 10000000 + movie->getId();
 }
 // Main function
 int main() {
-    Dictionary<Actor> actorTable; // Actor hash table
-    Dictionary<Movie> movieTable; // Movie hash table
-
+    Dictionary<Actor> actorTable;
+    Dictionary<Movie> movieTable;
+    
     AVLTree<Actor> actorTree(computeActorKey);
     AVLTree<Movie> movieTree(computeMovieKey);
 
