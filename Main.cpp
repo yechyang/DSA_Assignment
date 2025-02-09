@@ -45,7 +45,6 @@ void loadActors(const string& filename, Dictionary<Actor>& actorTable,AVLTree<Ac
         int intId = safeStoi(id);
 
         if (intId == -1 || name.empty() || year == -1) {
-            cerr << "Skipping invalid actor record: " << line << endl;
             continue;
         }
 
@@ -86,12 +85,10 @@ void loadMovies(const string& filename, Dictionary<Movie>& movieTable,AVLTree<Mo
 
         int year = safeStoi(releaseYear);
         if (id.empty() || title.empty() || year == -1) {
-            cerr << "Skipping invalid movie record: " << line << endl;
             continue;
         }
         int intId = safeStoi(id);
         if (intId == -1) {
-            cerr << "Skipping invalid actor record: " << line << endl;
             continue;
         }
 
@@ -126,12 +123,10 @@ void loadCast(const string& filename, Dictionary<Actor>& actorTable, Dictionary<
         getline(ss, movieId);
         int intActorId = safeStoi(actorId);
         if (intActorId == -1) {
-            cerr << "Skipping invalid actor record: " << line << endl;
             continue;
         }
         int intMovieId = safeStoi(movieId);
         if (intMovieId == -1) {
-            cerr << "Skipping invalid actor record: " << line << endl;
             continue;
         }
 
@@ -323,7 +318,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched actors
             cout << "Actors found:" << endl;
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << " (BirthYear: " << actors[i]->getBirthYear() << ")" << endl;
             }
 
             // User selects an actor
@@ -374,7 +369,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched actors
             cout << "\nActors found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << " (BirthYear: " << actors[i]->getBirthYear() << ")" << endl;
             }
 
             // User selects an actor
@@ -507,7 +502,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched actors
             cout << "\nActors found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << " (BirthYear: " << actors[i]->getBirthYear() << ")" << endl;
             }
 
             // User selects an actor
@@ -545,7 +540,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched actors
             cout << "\nActors found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << " (BirthYear: " << actors[i]->getBirthYear() << ")" << endl;
             }
 
             // Let user pick an actor from the list

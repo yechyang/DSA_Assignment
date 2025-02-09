@@ -374,7 +374,7 @@ void Actor::mergeByRating(Actor** actors, int left, int mid, int right) {
 
     // Merge the arrays by rating in **descending** order
     while (i < n1 && j < n2) {
-        if (leftArray[i]->getRating() >= rightArray[j]->getRating()) {
+        if (leftArray[i]->getRating() <= rightArray[j]->getRating()) {
             actors[k++] = leftArray[i++];
         } else {
             actors[k++] = rightArray[j++];
