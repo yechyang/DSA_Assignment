@@ -399,6 +399,11 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
                         cout << "Returning to main menu.\n";
                         return;
                     }
+                    // Ensure the ID is an actual actor and not mistakenly a movie ID
+                    if (movieTable.search(actorId) != nullptr) {
+                        cerr << "Error: This ID belongs to a movie, not an actor.\n";
+                        continue;
+                    }
 
                     // Search for the actor by ID
                     actor = actorTable.search(actorId);
