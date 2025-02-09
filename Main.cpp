@@ -5,6 +5,7 @@
 #include "AVLTree.h"
 #include "Actor.h"
 #include "Movie.h"
+#include "Graph.h"
 #include <ctime>
 
 using namespace std;
@@ -25,7 +26,7 @@ void skipHeader(ifstream& file) {
 }
 
 // Function to load actors from a CSV file
-void loadActors(const string& filename, Dictionary<Actor>& actorTable,AVLTree<Actor>& actorTree) {
+void loadActors(const string& filename, Dictionary<Actor>& actorTable,AVLTree<Actor>& actorTree, Graph& actorGraph) {
     ifstream file(filename);
     if (!file.is_open()) {
         cerr << "Error opening " << filename << endl;
@@ -110,28 +111,26 @@ void loadMovies(const string& filename, Dictionary<Movie>& movieTable,AVLTree<Mo
 }
 
 // Function to load cast relationships from a CSV file
-void loadCast(const string& filename, Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable) {
+void loadCast(const string& filename, Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable, Graph& actorGraph) {
     ifstream file(filename);
     if (!file.is_open()) {
         cerr << "Error opening " << filename << endl;
         return;
     }
 
-    skipHeader(file); // Skip the header row
+    skipHeader(file); // Skip header
 
     string line, actorId, movieId;
     while (getline(file, line)) {
         stringstream ss(line);
         getline(ss, actorId, ',');
         getline(ss, movieId);
+
         int intActorId = safeStoi(actorId);
-        if (intActorId == -1) {
-            cerr << "Skipping invalid actor record: " << line << endl;
-            continue;
-        }
         int intMovieId = safeStoi(movieId);
-        if (intMovieId == -1) {
-            cerr << "Skipping invalid actor record: " << line << endl;
+        
+        if (intActorId == -1 || intMovieId == -1) {
+            cerr << "Skipping invalid cast record: " << line << endl;
             continue;
         }
 
@@ -141,12 +140,22 @@ void loadCast(const string& filename, Dictionary<Actor>& actorTable, Dictionary<
         if (actor && movie) {
             actor->addMovie(movie);
             movie->addActor(actor);
-        } else {
-            cerr << "Skipping invalid cast relationship: " << line << endl;
+            actorGraph.addActor(actor); // **Pass the Actor* instead of ID**
+            
+            // Add edges between all actors in the same movie
+            int numActors;
+            Actor** actorsInMovie = movie->getSortedActors(numActors);
+            for (int i = 0; i < numActors; ++i) {
+                if (actorsInMovie[i]->getId() != intActorId) {
+                    actorGraph.addConnection(intActorId, actorsInMovie[i]->getId());
+                }
+            }
+            delete[] actorsInMovie;
         }
     }
+
     file.close();
-    cout << "Cast relationships loaded from " << filename << endl;
+    cout << "Cast relationships loaded and graph built from " << filename << endl;
 }
 
 // Global variables for filtering logic
@@ -177,7 +186,7 @@ void collectRecentMovies(const Movie& movie) {
 
 
 // Menu-driven application
-void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable, AVLTree<Actor>& actorTree, AVLTree<Movie>& movieTree) {
+void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable, AVLTree<Actor>& actorTree, AVLTree<Movie>& movieTree, Graph& actorGraph) {
     int choice;
 
     while (true) {
@@ -242,6 +251,15 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             Movie movie(id, title, plot, releaseYear);
             movieTable.insert(id, movie);
             cout << "Movie added successfully!" << endl;
+
+            Movie* moviePtr = movieTable.search(id);
+
+            if (moviePtr) {
+                // Insert into the AVL Tree
+                movieTree.insert(moviePtr);
+            } else {
+                cerr << "Error: Movie insertion failed!" << endl;
+            }
         } else if (choice == 3) {
             // Add an actor to a movie
             int actorId, movieId;
@@ -451,6 +469,8 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             Movie* selectedMovie = movies[choice - 1];
             delete[] movies;  // Free allocated memory
 
+            movieTree.remove(selectedMovie);
+
             // Get new details
             string newTitle, newPlot;
             int newReleaseYear;
@@ -462,9 +482,9 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             cout << "Enter new release year (enter 0 to keep current): ";
             cin >> newReleaseYear;
 
-            // Update the movie's details
             selectedMovie->updateDetails(newTitle, newPlot, newReleaseYear);
 
+            movieTree.insert(selectedMovie);
             cout << "\nMovie details updated successfully!" << endl;
         } else if (choice == 9) {
             int minAge, maxAge;
@@ -490,43 +510,43 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             cout << "\nMovies released in the past 3 years (sorted by year):\n";
             movieTree.displayMoviesInRange(pastyear, currentYear);
         } else if (choice == 11) {
-            // Search for an actor by name instead of ID
-            string actorName;
-            cout << "Enter Actor Name: ";
-            cin.ignore();
-            getline(cin, actorName);
+           // Search for an actor by name instead of ID
+           string actorName;
+           cout << "Enter Actor Name: ";
+           cin.ignore();
+           getline(cin, actorName);
 
-            int matchCount;
-            Actor** actors = actorTable.searchByName(actorName, matchCount);
+           int matchCount;
+           Actor** actors = actorTable.searchByName(actorName, matchCount);
 
-            if (!actors) {
-                cerr << "Error: Actor not found." << endl;
-                return;
-            }
+           if (!actors) {
+               cerr << "Error: Actor not found." << endl;
+               return;
+           }
 
-            // Display matched actors
-            cout << "\nActors found:\n";
-            for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
-            }
+           // Display matched actors
+           cout << "\nActors found:\n";
+           for (int i = 0; i < matchCount; ++i) {
+               cout << "(" << i + 1 << ") " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
+           }
 
-            // User selects an actor
-            int choice;
-            cout << "Enter the number of the actor you want: ";
-            cin >> choice;
+           // User selects an actor
+           int choice;
+           cout << "Enter the number of the actor you want: ";
+           cin >> choice;
 
-            if (choice < 1 || choice > matchCount) {
-                cerr << "Invalid selection." << endl;
-                delete[] actors;
-                return;
-            }
+           if (choice < 1 || choice > matchCount) {
+               cerr << "Invalid selection." << endl;
+               delete[] actors;
+               return;
+           }
 
-            // Retrieve selected actor
-            Actor* selectedActor = actors[choice - 1];
-            delete[] actors;  // Free allocated memory
+           // Retrieve selected actor
+           Actor* selectedActor = actors[choice - 1];
+           delete[] actors;  // Free allocated memory
 
             // Display known actors
-            selectedActor->displayKnownActors();
+            actorGraph.displayConnections(selectedActor);
         }  else if (choice == 12) {
             // Update actor rating using actor name search
             string actorName;
@@ -728,13 +748,15 @@ int main() {
 
     AVLTree<Actor> actorTree(computeActorKey);
     AVLTree<Movie> movieTree(computeMovieKey);
+
+    Graph actorGraph;
     
     // Load data from CSV files
-    loadActors("actors.csv", actorTable, actorTree);
+    loadActors("actors.csv", actorTable, actorTree,actorGraph);
     loadMovies("movies.csv", movieTable, movieTree);
-    loadCast("cast.csv", actorTable, movieTable);
+    loadCast("cast.csv", actorTable, movieTable,actorGraph);
     // Run the application
-    runApplication(actorTable, movieTable,actorTree, movieTree);
+    runApplication(actorTable, movieTable,actorTree, movieTree,actorGraph);
 
     return 0;
 }
