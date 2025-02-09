@@ -543,7 +543,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // User selects an actor
             int choice;
             while (true) {
-                cout << "Enter the number of the actor you want to update (Enter 0 to return to menu): ";
+                cout << "\nEnter the number of the actor you want to update (Enter 0 to return to menu): ";
                 if (!(cin >> choice) || choice < 0 || choice > matchCount) {
                     cerr << "Invalid selection. Please enter a number between 1 and " << matchCount << " or enter 0 to return.\n";
                     cin.clear();
@@ -659,7 +659,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // User selects a movie
             int choice;
             while (true) {
-                cout << "Enter the number of the movie you want to update (Enter 0 to return to menu): ";
+                cout << "\nEnter the number of the movie you want to update (Enter 0 to return to menu): ";
                 if (!(cin >> choice) || choice < 0 || choice > matchCount) {
                     cerr << "Invalid selection. Please enter a number between 1 and " << matchCount << " or enter 0 to return.\n";
                     cin.clear();
