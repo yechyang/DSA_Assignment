@@ -179,19 +179,76 @@ Movie** Actor::sortMoviesByRating(int& count) const {
 }
 
 
+// Helper function to merge two sorted halves
+void merge(Actor** actors, int left, int mid, int right) {
+    int leftSize = mid - left + 1;
+    int rightSize = right - mid;
 
+    Actor** leftArr = new Actor*[leftSize];
+    Actor** rightArr = new Actor*[rightSize];
+
+    for (int i = 0; i < leftSize; i++)
+        leftArr[i] = actors[left + i];
+
+    for (int i = 0; i < rightSize; i++)
+        rightArr[i] = actors[mid + 1 + i];
+
+    int i = 0, j = 0, k = left;
+
+    while (i < leftSize && j < rightSize) {
+        if (leftArr[i]->getRating() >= rightArr[j]->getRating()) {
+            actors[k] = leftArr[i];
+            i++;
+        } else {
+            actors[k] = rightArr[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < leftSize) {
+        actors[k] = leftArr[i];
+        i++;
+        k++;
+    }
+
+    while (j < rightSize) {
+        actors[k] = rightArr[j];
+        j++;
+        k++;
+    }
+
+    delete[] leftArr;
+    delete[] rightArr;
+}
+
+// Merge Sort function
+void mergeSort(Actor** actors, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        mergeSort(actors, left, mid);
+        mergeSort(actors, mid + 1, right);
+
+        merge(actors, left, mid, right);
+    }
+}
+
+// Updated recommendActorsByRating function using Merge Sort
 void Actor::recommendActorsByRating(Actor** actors, int totalActors, float minRating) const {
-    cout << "\nActors with rating higher than " << minRating << ":\n";
+    // Sort actors by rating in descending order using Merge Sort
+    mergeSort(actors, 0, totalActors - 1);
+
+    cout << "\nActors with rating higher than " << minRating << " (Sorted by Rating):\n";
     bool found = false;
 
     for (int i = 0; i < totalActors; ++i) {
         if (actors[i]->getRating() >= minRating) {
             cout << "- " << actors[i]->getName() << " (Rating: " << actors[i]->getRating() << "/10)\n";
 
-            // ✅ Use LinkedList<Movie> instead of `movieHead`
             ListNode<Movie>* movieNode = actors[i]->getMovies().getHead();
             if (!movieNode) {
-                cout << "  No movies found for this actor.\n";
+                cout << "  No movies found for this actor.\n" << endl;
             } else {
                 cout << "  Movies:\n";
                 while (movieNode) {
@@ -210,4 +267,3 @@ void Actor::recommendActorsByRating(Actor** actors, int totalActors, float minRa
         cout << "No actors found with the specified rating.\n";
     }
 }
-
