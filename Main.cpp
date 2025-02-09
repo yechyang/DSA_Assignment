@@ -215,7 +215,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         cout << "6.  Display actors by age range\n";
         cout << "7.  Display movies made within past 3 years\n";
         cout << "8.  Display all movies of an actor\n";
-        cout << "9.  Display all actors of a movie\n";
+        cout << "9.  Display all actors in a movie\n";
         cout << "10. Display a list of all actors that a particular actor knows.\n";
         cout << "11. Update actor rating" << endl;
         cout << "12. Update movie rating" << endl;
@@ -527,7 +527,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
                 }
             }
 
-            // ✅ **Add actor to movie (if not already linked)**
+            // Add actor to movie (if not already linked)
             if (!actor->getMovies().contains(movie) && !movie->getActors().contains(actor)) {
                 actor->addMovie(movie);
                 movie->addActor(actor);
@@ -959,10 +959,10 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
             while (true) {
-                cout << "Enter Movie name (Enter 0 to return to menu): ";
+                cout << "Enter Movie title (Enter 0 to return to menu): ";
 
                 if (!getline(cin, movieName) || movieName.empty()) {
-                    cerr << "Error: Movie name cannot be empty. Please enter a valid name or enter 0 to return.\n";
+                    cerr << "Error: Movie title cannot be empty. Please enter a valid title or enter 0 to return.\n";
                     continue;
                 }
 
@@ -979,7 +979,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
                     break;  // **Exit loop when valid movie is found**
                 }
 
-                cerr << "Error: Movie not found. Please enter a valid name or enter 0 to return.\n";
+                cerr << "Error: Movie not found. Please enter a valid title or enter 0 to return.\n";
             }
 
             // Display matched movies
