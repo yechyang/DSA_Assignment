@@ -531,10 +531,25 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             if (!actor->getMovies().contains(movie) && !movie->getActors().contains(actor)) {
                 actor->addMovie(movie);
                 movie->addActor(actor);
-                cout << "Relationship added successfully!" << endl;
+                
+                // Add the actor to the graph (if not already present)
+                actorGraph.addActor(actor);
+            
+                // Connect this actor to all existing actors in the movie
+                int numActors;
+                Actor** actorsInMovie = movie->getSortedActors(numActors);
+                for (int i = 0; i < numActors; ++i) {
+                    if (actorsInMovie[i]->getId() != actor->getId()) {
+                        actorGraph.addConnection(actor->getId(), actorsInMovie[i]->getId());
+                    }
+                }
+                delete[] actorsInMovie;  // Free memory
+            
+                cout << "Relationship added successfully and graph updated!" << endl;
             } else {
                 cerr << "Error: Actor is already associated with this movie." << endl;
             }
+            
         } else if (choice == 4) {
             // Update actor details by searching for name
             string actorName;
@@ -1142,6 +1157,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             delete[] actors;  // Free allocated memory
 
             // Display known actors
+            cout << endl;
             actorGraph.displayConnections(selectedActor);
         } else if (choice == 11) {
            string actorName;
