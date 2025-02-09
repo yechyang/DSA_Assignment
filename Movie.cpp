@@ -122,17 +122,66 @@ Actor** Movie::sortActorsByRating(int& count) const {
 }
 
 
-// Insertion Sort for Movies by Rating
-void Movie::insertionSortMoviesByRating(Movie** movies, int count) const {
-    for (int i = 1; i < count; ++i) {
-        Movie* key = movies[i];
-        int j = i - 1;
 
-        while (j >= 0 && movies[j]->getRating() < key->getRating()) {
-            movies[j + 1] = movies[j];
-            j = j - 1;
+// Helper function to merge two sorted halves
+void mergeMoviesByRating(Movie** movies, int left, int mid, int right) {
+    int leftSize = mid - left + 1;
+    int rightSize = right - mid;
+
+    // Temporary arrays
+    Movie** leftArr = new Movie*[leftSize];
+    Movie** rightArr = new Movie*[rightSize];
+
+    // Copy data to temp arrays
+    for (int i = 0; i < leftSize; i++) 
+        leftArr[i] = movies[left + i];
+
+    for (int i = 0; i < rightSize; i++) 
+        rightArr[i] = movies[mid + 1 + i];
+
+    // Merge the temp arrays back into movies[]
+    int i = 0, j = 0, k = left;
+    while (i < leftSize && j < rightSize) {
+        if (leftArr[i]->getRating() >= rightArr[j]->getRating()) {
+            movies[k] = leftArr[i];
+            i++;
+        } else {
+            movies[k] = rightArr[j];
+            j++;
         }
-        movies[j + 1] = key;
+        k++;
+    }
+
+    // Copy remaining elements of leftArr[]
+    while (i < leftSize) {
+        movies[k] = leftArr[i];
+        i++;
+        k++;
+    }
+
+    // Copy remaining elements of rightArr[]
+    while (j < rightSize) {
+        movies[k] = rightArr[j];
+        j++;
+        k++;
+    }
+
+    // Free temporary arrays
+    delete[] leftArr;
+    delete[] rightArr;
+}
+
+// Merge Sort function
+void mergeSortMoviesByRating(Movie** movies, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        // Recursively sort the left and right halves
+        mergeSortMoviesByRating(movies, left, mid);
+        mergeSortMoviesByRating(movies, mid + 1, right);
+
+        // Merge the sorted halves
+        mergeMoviesByRating(movies, left, mid, right);
     }
 }
 
@@ -140,6 +189,7 @@ void Movie::recommendMoviesByRating(Movie** movies, int totalMovies, float minRa
     cout << "\nMovies with rating higher than " << minRating << ":\n";
     int count = 0;
 
+    // Step 1: Count how many movies qualify
     for (int i = 0; i < totalMovies; ++i) {
         if (movies[i]->getRating() >= minRating) {
             count++;
@@ -151,6 +201,7 @@ void Movie::recommendMoviesByRating(Movie** movies, int totalMovies, float minRa
         return;
     }
 
+    // Step 2: Store qualifying movies
     Movie** filteredMovies = new Movie*[count];
     int index = 0;
     for (int i = 0; i < totalMovies; ++i) {
@@ -159,49 +210,38 @@ void Movie::recommendMoviesByRating(Movie** movies, int totalMovies, float minRa
         }
     }
 
-    insertionSortMoviesByRating(filteredMovies, count);
+    // Step 3: Sort by movie rating using Merge Sort
+    mergeSortMoviesByRating(filteredMovies, 0, count - 1);
 
+    // Step 4: Display movies along with their actors and ratings
     for (int i = 0; i < count; ++i) {
-        cout << "- " << filteredMovies[i]->getTitle() << " Rating: " << filteredMovies[i]->getRating() <<"/10\n";
-    }
+        Movie* movie = filteredMovies[i];
 
-    delete[] filteredMovies;
-}
+        cout << "\n-- " << movie->getTitle() << " -- (Rating: " << movie->getRating() << "/10)\n";
 
-void Movie::recommendMoviesByYear(Movie** movies, int totalMovies, int year) const {
-    cout << "\nMovies from the year " << year << ":\n";
-    int yearCount = 0;
+        // Fetch the list of actors in the movie
+        int actorCount;
+        Actor** actors = movie->getSortedActors(actorCount);
 
-    // First, count movies from the specified year that also have a rating > 0
-    for (int i = 0; i < totalMovies; ++i) {
-        if (movies[i]->getReleaseYear() == year && movies[i]->getRating() > 0.0f) {
-            yearCount++;
+        if (actorCount == 0) {
+            cout << "   No actors found for this movie.\n";
+        } else {
+            cout << "   Actors: \n";
+            for (int j = 0; j < actorCount; ++j) {
+                cout << "   - " << actors[j]->getName();
+
+                // Include actor rating if available
+                if (actors[j]->getRating() > 0) {
+                    cout << " (Rating: " << actors[j]->getRating() << "/10)";
+                }
+                cout << "\n";
+            }
         }
+
+        delete[] actors; // Free allocated memory
     }
 
-    if (yearCount == 0) {
-        cout << "No rated movies found from the specified year." << endl;
-        return;
-    }
-
-    // Store movies from the specified year that have a rating > 0
-    Movie** yearMovies = new Movie*[yearCount];
-    int index = 0;
-    for (int i = 0; i < totalMovies; ++i) {
-        if (movies[i]->getReleaseYear() == year && movies[i]->getRating() > 0.0f) {
-            yearMovies[index++] = movies[i];
-        }
-    }
-
-    // Sort using insertion sort
-    insertionSortMoviesByRating(yearMovies, yearCount);
-
-    // Display sorted movies
-    for (int i = 0; i < yearCount; ++i) {
-        cout << "- " << yearMovies[i]->getTitle() << " Rating: " << yearMovies[i]->getRating() <<"/10\n";
-    }
-
-    delete[] yearMovies;
+    delete[] filteredMovies; // Free allocated memory
 }
 
 
