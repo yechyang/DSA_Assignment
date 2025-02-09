@@ -33,18 +33,20 @@ void Actor::setRating(float newRating) {
     }
 }
 
-// Add a movie to the actor's list
+// Time Complexity: O(n) - checking for duplicates takes O(n) in the worst case
+// Add a movie to the actor's linked list
 void Actor::addMovie(Movie* movie) {
     if (!movie || movies.contains(movie)) return;  // Prevent duplicates
     movies.append(movie);
 }
 
 
-// Get movies list
+// Returns the linked list of movies associated with the actor
 LinkedList<Movie>& Actor::getMovies() {
     return movies;
 }
 
+// Updates actor details if new values are provided
 void Actor::updateDetails(const string& newName, int newBirthYear) {
     if (!newName.empty()) {
         name = newName;
@@ -59,14 +61,18 @@ void displayMovie(const Movie& movie) {
     movie.display();  // Call Movie's display function
 }
 
+// Time Complexity: O(n) - Traverses the linked list of movies
 void Actor::display() const {
     cout << "Actor ID: " << id << ", Name: " << name << ", Birth Year: " << birthYear << endl;
     cout << "\nMovies:" << endl;
     
-    movies.display(displayMovie);
+    movies.display(displayMovie); // Call linked list display function
 }
 
-// Insertion Sort for Sorting Movies by Title
+// Insertion Sort: Sorts movies alphabetically by title
+// Time Complexity: O(n^2) - Worst case when the array is in reverse order
+// Best case is O(n) if already sorted
+// Space Complexity: O(1) - In-place sorting
 void insertionSortMovies(Movie** movies, int count) {
     for (int i = 1; i < count; ++i) {
         Movie* key = movies[i];
@@ -81,9 +87,12 @@ void insertionSortMovies(Movie** movies, int count) {
     }
 }
 
+// Converts linked list of movies to an array and sorts them alphabetically
+// Time Complexity: O(n log n) - Using Merge Sort
+// Space Complexity: O(n) - Allocates array for movies
 Movie** Actor::getSortedMovies(int& count) const {
     // Convert LinkedList to an array using the actual `movies` LinkedList instance
-    Movie** movieArray = movies.toArray(count);  // Call `toArray()` correctly
+    Movie** movieArray = movies.toArray(count);  // Convert LinkedList to array
 
     if (count == 0) return nullptr;
 
@@ -93,81 +102,28 @@ Movie** Actor::getSortedMovies(int& count) const {
     return movieArray;
 }
 
-//
-// Change to ADT Queue
-//
-void Actor::displayKnownActors() const {
-    const int maxActors = 1000; // Adjust as needed
-    Actor* knownActors[maxActors];
-    int knownCount = 0;
 
-    Dictionary<bool> processedActors; // Track processed actors
-    Dictionary<bool> level1Actors; // Track level-1 actors separately
-
-    // First-level connections
-    ListNode<Movie>* movieNode = movies.getHead(); // ✅ Use LinkedList<Movie> instead of movieHead
-    while (movieNode) {
-        Movie* movie = movieNode->data;
-        ListNode<Actor>* actorNode = movie->getActors().getHead(); // ✅ Get actors from LinkedList<Actor>
-        while (actorNode) {
-            Actor* currentActor = actorNode->data;
-            if (currentActor != this && !processedActors.search(currentActor->getId())) {
-                knownActors[knownCount++] = currentActor;
-                processedActors.insert(currentActor->getId(), true);
-                level1Actors.insert(currentActor->getId(), true); // Mark as level-1
-            }
-            actorNode = actorNode->next;
-        }
-        movieNode = movieNode->next;
-    }
-
-    // Second-level connections (only for level-1 actors)
-    for (int i = 0; i < knownCount; ++i) {
-        Actor* level1Actor = knownActors[i];
-        if (!level1Actors.search(level1Actor->getId())) continue; // Ensure only level-1 actors expand
-
-        ListNode<Movie>* level1MovieNode = level1Actor->getMovies().getHead(); // ✅ Get movies from LinkedList<Movie>
-        while (level1MovieNode) {
-            Movie* movie = level1MovieNode->data;
-            ListNode<Actor>* actorNode = movie->getActors().getHead();
-            while (actorNode) {
-                Actor* currentActor = actorNode->data;
-                if (currentActor != this && !processedActors.search(currentActor->getId())) {
-                    knownActors[knownCount++] = currentActor;
-                    processedActors.insert(currentActor->getId(), true);
-                }
-                actorNode = actorNode->next;
-            }
-            level1MovieNode = level1MovieNode->next;
-        }
-    }
-
-    // Display known actors
-    cout << "Actors known by " << name << ":" << endl;
-    for (int i = 0; i < knownCount; ++i) {
-        cout << "- ID: " << knownActors[i]->getId()
-             << ", Name: " << knownActors[i]->getName() << endl;
-    }
-}
-
-
-
-
-// Insertion Sort for Actors by Rating
+// Insertion Sort: Sorts movies in descending order by rating
+// Time Complexity: O(n^2) - Worst case when movies are in ascending order
+// Best case is O(n) if movies are already sorted in descending order
+// Space Complexity: O(1) - In-place sorting (no extra memory used)
 void Actor::insertionSortMoviesByRating(Movie** movies, int count) const {
     for (int i = 1; i < count; ++i) {
-        Movie* key = movies[i];
+        Movie* key = movies[i]; // Current movie being inserted into sorted portion
         int j = i - 1;
 
         // Move elements that have a LOWER rating forward (higher ratings on top)
         while (j >= 0 && movies[j]->getRating() < key->getRating()) {
-            movies[j + 1] = movies[j];
+            movies[j + 1] = movies[j]; // Shift elements forward
             j = j - 1;
         }
-        movies[j + 1] = key;
+        movies[j + 1] = key; // Insert movie at correct position
     }
 }
 
+// Converts the actor's linked list of movies to an array and sorts them by rating (descending)
+// Time Complexity: O(n^2) using Insertion Sort (Worse Case)
+// Space Complexity: O(n) - Creates an array to store movies
 Movie** Actor::sortMoviesByRating(int& count) const {
     Movie** movieArray = movies.toArray(count);
     if (count == 0) return nullptr;
@@ -222,7 +178,9 @@ void merge(Actor** actors, int left, int mid, int right) {
     delete[] rightArr;
 }
 
-// Merge Sort function
+// Merge Sort for sorting actors by rating (descending order)
+// Time Complexity: O(n log n) - Efficient sorting
+// Space Complexity: O(n) - Uses extra arrays for merging
 void mergeSort(Actor** actors, int left, int right) {
     if (left < right) {
         int mid = left + (right - left) / 2;
@@ -234,7 +192,9 @@ void mergeSort(Actor** actors, int left, int right) {
     }
 }
 
-// Updated recommendActorsByRating function using Merge Sort
+// Recommend actors based on rating, sorted using Merge Sort
+// Time Complexity: O(n log n) - Due to Merge Sort
+// Space Complexity: O(n) - Uses additional space for sorting
 void Actor::recommendActorsByRating(Actor** actors, int totalActors, float minRating) const {
     // Sort actors by rating in descending order using Merge Sort
     mergeSort(actors, 0, totalActors - 1);

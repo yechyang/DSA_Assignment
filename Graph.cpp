@@ -8,6 +8,7 @@ Graph::Graph() {
 }
 
 // **Destructor**
+// Time Complexity: O(N + E) Where N = number of actors, E = number of connections
 Graph::~Graph() {
     ActorNode* currentActor = actorList;
     while (currentActor) {
@@ -15,15 +16,19 @@ Graph::~Graph() {
         while (neighbor) {
             ListNode* temp = neighbor;
             neighbor = neighbor->next;
-            delete temp;
-        }
+            delete temp; // Free adjacency list memory
+        } 
         ActorNode* temp = currentActor;
         currentActor = currentActor->next;
-        delete temp;
+        delete temp;  // Free actor node memory
     }
 }
 
 // **Find an actor node in the graph**
+// Searches for an actor by ID in the actor list
+// Returns a pointer to the actor node if found, otherwise nullptr
+// Time Complexity: O(N) (Worst case: iterate through all actors)
+// Space Complexity: O(1)
 Graph::ActorNode* Graph::findActor(int actorId) {
     ActorNode* current = actorList;
     while (current) {
@@ -34,6 +39,8 @@ Graph::ActorNode* Graph::findActor(int actorId) {
 }
 
 // **Add an actor to the graph (if not exists)**
+// Time Complexity: O(N) (Search for existing actor before adding)
+// Space Complexity: O(1) (Only storing a new node)
 void Graph::addActor(Actor* actor) {
     if (findActor(actor->getId())) return; // Actor already exists
 
@@ -43,6 +50,9 @@ void Graph::addActor(Actor* actor) {
 }
 
 // **Add a connection (edge) between two actors**
+// Creates an undirected edge (bi-directional relationship) between two actors
+// Time Complexity: O(N) (Search for both actors) + O(E) (Check if connection exists) ≈ O(N)
+// Space Complexity: O(1) (Only storing two new nodes if needed)
 void Graph::addConnection(int actor1, int actor2) {
     ActorNode* actorNode1 = findActor(actor1);
     ActorNode* actorNode2 = findActor(actor2);
@@ -68,6 +78,9 @@ void Graph::addConnection(int actor1, int actor2) {
 }
 
 // **Display all actors known by a particular actor**
+// Uses BFS-like traversal to find direct and indirect connections
+// Time Complexity: O(N + E) (Visits all actors and edges up to second level)
+// Space Complexity: O(N) (Uses dictionaries to track visited actors)
 void Graph::displayConnections(Actor* actor) {
     if (!actor) {
         std::cout << "Actor not found in the graph.\n";
@@ -80,12 +93,13 @@ void Graph::displayConnections(Actor* actor) {
         return;
     }
 
+    // **Array to store known actors (direct and indirect)**
     const int maxActors = 17000;
     int knownActors[maxActors];
     int knownCount = 0;
 
-    Dictionary<bool> processedActors;
-    Dictionary<bool> level1Actors;
+    Dictionary<bool> processedActors; // Actors already displayed
+    Dictionary<bool> level1Actors; // Direct co-actors
 
     // First-level connections (direct co-actors)
     ListNode* neighbor = actorNode->head;
@@ -98,22 +112,25 @@ void Graph::displayConnections(Actor* actor) {
             continue;
         }
 
-        if (!processedActors.search(coActorId)) {
-            knownActors[knownCount++] = coActorId;
-            processedActors.insert(coActorId, true);
-            level1Actors.insert(coActorId, true);
+        // **Only add unique co-actors**
+        if (!processedActors.search(coActorId)) { // Avoid duplicates
+            knownActors[knownCount++] = coActorId; // Store actor ID in the array
+            processedActors.insert(coActorId, true); // Mark as processed
+            level1Actors.insert(coActorId, true);  // Mark as a direct co-actor
         }
         neighbor = neighbor->next;
     }
 
     // Second-level connections (co-actors of co-actors)
+    // This loop iterates through all the first-level actors and finds their co-actors.
     for (int i = 0; i < knownCount; ++i) {
         int level1ActorId = knownActors[i];
-        if (!level1Actors.search(level1ActorId)) continue;
+        if (!level1Actors.search(level1ActorId)) continue;  // **Ensure this actor was a direct connection before proceeding**
 
         ActorNode* level1Actor = findActor(level1ActorId);
         if (!level1Actor) continue;
 
+        // **Iterate through the second-level co-actors**
         ListNode* level1Neighbor = level1Actor->head;
         while (level1Neighbor) {
             int secondLevelActorId = level1Neighbor->actorId;
@@ -124,6 +141,7 @@ void Graph::displayConnections(Actor* actor) {
                 continue;
             }
 
+            // **Only add unique second-level connections**
             if (!processedActors.search(secondLevelActorId)) {
                 knownActors[knownCount++] = secondLevelActorId;
                 processedActors.insert(secondLevelActorId, true);

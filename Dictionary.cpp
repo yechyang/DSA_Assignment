@@ -5,6 +5,9 @@
 using namespace std;
 
 // Constructor
+// Initializes a hash table with a given initial size
+// Time Complexity: O(N) - Initializes an array of size N
+// Space Complexity: O(N) - Stores an array of pointers to linked list nodes
 template <typename T>
 Dictionary<T>::Dictionary(int initialSize) : size(initialSize), numElements(0) {
     table = new Node<T>*[size];
@@ -14,6 +17,9 @@ Dictionary<T>::Dictionary(int initialSize) : size(initialSize), numElements(0) {
 }
 
 // Destructor
+// Deallocates all dynamically allocated memory in the hash table
+// Time Complexity: O(N) - Iterates through all buckets and deletes linked list nodes
+// Space Complexity: O(1) - No extra space used, only deallocating memory
 template <typename T>
 Dictionary<T>::~Dictionary() {
     for (int i = 0; i < size; ++i) {
@@ -21,7 +27,7 @@ Dictionary<T>::~Dictionary() {
         while (current) {
             Node<T>* temp = current;
             current = current->next;
-            delete temp;
+            delete temp;  // Delete each node
         }
     }
     delete[] table;
@@ -34,32 +40,37 @@ int Dictionary<T>::hashFunction(const int& key) const {
 }
 
 // Insert with dynamic resizing
+// Inserts a key-value pair into the hash table and resizes if load factor > 70%
+// Time Complexity: O(1) (Average case), O(N) (Worst case when resizing)
+// Space Complexity: O(1) (No extra space except new node, unless resizing occurs)
 template <typename T>
 void Dictionary<T>::insert(const int& key, const T& value) {
     if ((numElements / (float)size) > 0.7) { // Load factor > 70%
         resize();
     }
 
-    int index = hashFunction(key);
+    int index = hashFunction(key);  // Compute index
     Node<T>* newNode = new Node<T>(key, value);
 
     if (!table[index]) {
-        table[index] = newNode;
+        table[index] = newNode;  // Insert if bucket is empty
     } else {
         Node<T>* current = table[index];
-        while (current->next) {
+        while (current->next) { // Traverse to the last node
             current = current->next;
         }
-        current->next = newNode;
+        current->next = newNode; // Append new node at end of linked list
     }
     numElements++;  // Increase element count
 }
 
 // Resize the dictionary when load factor is too high
+// Time Complexity: O(N) - Rehashing requires iterating over all elements
+// Space Complexity: O(N) - New array of double the size
 template <typename T>
 void Dictionary<T>::resize() {
     int newCapacity = size * 2; // Double the size
-    Node<T>** newTable = new Node<T>*[newCapacity];
+    Node<T>** newTable = new Node<T>*[newCapacity];  // Allocate new table
 
     for (int i = 0; i < newCapacity; ++i) {
         newTable[i] = nullptr;
@@ -79,7 +90,7 @@ void Dictionary<T>::resize() {
         }
     }
 
-    // Replace old table
+    // Replace old table with new table
     delete[] table;
     table = newTable;
     size = newCapacity;
@@ -88,6 +99,9 @@ void Dictionary<T>::resize() {
 }
 
 // Search for a value by key
+// Returns a pointer to the value if found, else nullptr
+// Time Complexity: O(1) (Average case), O(N) (Worst case if many collisions)
+// Space Complexity: O(1)
 template <typename T>
 T* Dictionary<T>::search(const int& key) const {
     int index = hashFunction(key);
@@ -101,7 +115,11 @@ T* Dictionary<T>::search(const int& key) const {
     }
     return nullptr;
 }
+
 // Manual trimming function (no STL)
+// Removes leading and trailing spaces from a string
+// Time Complexity: O(N)
+// Space Complexity: O(1)
 string trim(const string& str) {
     int start = 0;
     int end = str.length() - 1;
@@ -127,6 +145,10 @@ string toLower(const string& str) {
     return lowerStr;
 }
 
+// Search for movies by title
+// Returns an array of movie pointers if found, else nullptr
+// Time Complexity: O(N) (Iterates through all buckets and linked list nodes)
+// Space Complexity: O(K) (Stores matched movie pointers, where K is match count)
 template <>
 Movie** Dictionary<Movie>::searchByTitle(const string& name, int& matchCount) {
     matchCount = 0;
@@ -153,7 +175,10 @@ Movie** Dictionary<Movie>::searchByTitle(const string& name, int& matchCount) {
     return matches;
 }
 
-// Search for actors by name, allowing multiple matches
+// Search for actors by name
+// Returns an array of actor pointers if found, else nullptr
+// Time Complexity: O(N) (Iterates through all buckets and linked list nodes)
+// Space Complexity: O(K) (Stores matched actor pointers, where K is match count)
 template <>
 Actor** Dictionary<Actor>::searchByName(const string& name, int& matchCount) {
     matchCount = 0;
@@ -182,6 +207,9 @@ Actor** Dictionary<Actor>::searchByName(const string& name, int& matchCount) {
 
 
 // Remove a key-value pair
+// Returns true if removed, false if key not found
+// Time Complexity: O(1) (Average case), O(N) (Worst case with many collisions)
+// Space Complexity: O(1)
 template <typename T>
 bool Dictionary<T>::remove(const int& key) {
     int index = hashFunction(key);

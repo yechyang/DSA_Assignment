@@ -34,13 +34,19 @@ void Movie::setRating(float newRating) {
     }
 }
 
-// Add an actor to the movie's list
+// **Adds an actor to the movie's list**  
+// Ensures no duplicate actors are added.  
+// Time Complexity: O(N) (Since `contains()` checks if the actor already exists)  
+// Space Complexity: O(1)  
 void Movie::addActor(Actor* actor) {
     if (!actor || actors.contains(actor)) return;  // Prevent duplicates
     actors.append(actor);
 }
 
-
+// **Updates movie details (title, plot, release year)**  
+// Only updates non-empty values and valid years.  
+// Time Complexity: O(1)  
+// Space Complexity: O(1)  
 void Movie::updateDetails(const string& newTitle, const string& newPlot, int newReleaseYear) {
     if (!newTitle.empty()) {
         title = newTitle;
@@ -55,7 +61,9 @@ void Movie::updateDetails(const string& newTitle, const string& newPlot, int new
 }
 
 
-// Updated display to use function pointer instead of lambda
+// Calls a function pointer to print actors.  
+// Time Complexity: O(N) (where N is the number of actors in the movie)  
+// Space Complexity: O(1)  
 void Movie::display() const {
     cout << "Movie ID: " << id << ", \nTitle: " << title
          << ", \nPlot: " << plot << ", \nRelease Year: " << releaseYear << endl;
@@ -64,13 +72,19 @@ void Movie::display() const {
     actors.display(Movie::displayActorInfo);  // Use function pointer
 }
 
-// Static function to display an actor
+// **Static function to display actor information**  
+// Used for displaying linked actors.  
+// Time Complexity: O(1)  
+// Space Complexity: O(1)  
 void Movie::displayActorInfo(const Actor& actor) {
     cout << " - ID: " << actor.getId() << ", Name: " << actor.getName() << endl;
 }
 
 
-// Insertion Sort for Sorting Actors by Name
+// **Insertion Sort for Sorting Actors by Name**
+// Sorts actors alphabetically using insertion sort.
+// Time Complexity: O(N^2) (Worst case), O(N) (Best case if already sorted)
+// Space Complexity: O(1)
 void insertionSortActors(Actor** actors, int count) {
     for (int i = 1; i < count; ++i) {
         Actor* key = actors[i];
@@ -85,7 +99,10 @@ void insertionSortActors(Actor** actors, int count) {
     }
 }
 
-// **Updated Sorting Function Using Insertion Sort**
+// **Returns actors sorted alphabetically**
+// Uses insertion sort (good for small datasets).
+// Time Complexity: O(N^2) worst case, O(N) best case
+// Space Complexity: O(N) (stores sorted array)
 Actor** Movie::getSortedActors(int& count) const {
     Actor** actorArray = actors.toArray(count);
     if (count == 0) return nullptr;
@@ -96,7 +113,9 @@ Actor** Movie::getSortedActors(int& count) const {
     return actorArray;
 }
 
-// Insertion Sort for Actors by Rating
+// **Insertion Sort for Sorting Actors by Rating**
+// Time Complexity: O(N^2) (Worst case), O(N) (Best case)
+// Space Complexity: O(1)
 void Movie::insertionSortActorsByRating(Actor** actors, int count) const {
     for (int i = 1; i < count; ++i) {
         Actor* key = actors[i];
@@ -111,6 +130,10 @@ void Movie::insertionSortActorsByRating(Actor** actors, int count) const {
     }
 }
 
+
+// **Returns actors sorted by rating (Descending Order)**
+// Time Complexity: O(N^2) worst case, O(N) best case
+// Space Complexity: O(N)
 Actor** Movie::sortActorsByRating(int& count) const {
     Actor** actorArray = actors.toArray(count);
     if (count == 0) return nullptr;
@@ -122,8 +145,9 @@ Actor** Movie::sortActorsByRating(int& count) const {
 }
 
 
-
-// Helper function to merge two sorted halves
+// **Merge Sort for Sorting Movies by Rating (Descending)**
+// Time Complexity: O(N log N)
+// Space Complexity: O(N)
 void mergeMoviesByRating(Movie** movies, int left, int mid, int right) {
     int leftSize = mid - left + 1;
     int rightSize = right - mid;
@@ -171,7 +195,9 @@ void mergeMoviesByRating(Movie** movies, int left, int mid, int right) {
     delete[] rightArr;
 }
 
-// Merge Sort function
+// **Merge Sort Function**
+// Time Complexity: O(N log N)
+// Space Complexity: O(N)
 void mergeSortMoviesByRating(Movie** movies, int left, int right) {
     if (left < right) {
         int mid = left + (right - left) / 2;
@@ -190,6 +216,8 @@ void Movie::recommendMoviesByRating(Movie** movies, int totalMovies, float minRa
     int count = 0;
 
     // Step 1: Count how many movies qualify
+    // Iterates through the movie list and counts how many meet the rating threshold.
+    // Time Complexity: O(N) (where N = totalMovies)
     for (int i = 0; i < totalMovies; ++i) {
         if (movies[i]->getRating() >= minRating) {
             count++;
@@ -202,6 +230,9 @@ void Movie::recommendMoviesByRating(Movie** movies, int totalMovies, float minRa
     }
 
     // Step 2: Store qualifying movies
+    // Allocates memory for a new array to store movies that meet the rating condition.
+    // Time Complexity: O(N)
+    // Space Complexity: O(N) (creates new array for filtered movies)
     Movie** filteredMovies = new Movie*[count];
     int index = 0;
     for (int i = 0; i < totalMovies; ++i) {
@@ -211,7 +242,7 @@ void Movie::recommendMoviesByRating(Movie** movies, int totalMovies, float minRa
     }
 
     // Step 3: Sort by movie rating using Merge Sort
-    mergeSortMoviesByRating(filteredMovies, 0, count - 1);
+    mergeSortMoviesByRating(filteredMovies, 0, count - 1); // Time Complexity: O(N log N)
 
     // Step 4: Display movies along with their actors and ratings
     for (int i = 0; i < count; ++i) {

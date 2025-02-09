@@ -30,6 +30,7 @@ int AVLTree<T>::getLarger(int a, int b) {
 }
 
 // Right Rotate (for balancing)
+// Used to fix left-heavy trees;
 template <typename T>
 AVLNode<T>* AVLTree<T>::rightRotate(AVLNode<T>* nodeN) {
     AVLNode<T>* nodeC = nodeN->left;
@@ -43,7 +44,8 @@ AVLNode<T>* AVLTree<T>::rightRotate(AVLNode<T>* nodeN) {
     return nodeC;
 }
 
-// Left Rotate (for balancing)
+// Left Rotate
+// Used to fix right-heavy imbalance
 template <typename T>
 AVLNode<T>* AVLTree<T>::leftRotate(AVLNode<T>* nodeN) {
     AVLNode<T>* nodeC = nodeN->right;
@@ -57,10 +59,13 @@ AVLNode<T>* AVLTree<T>::leftRotate(AVLNode<T>* nodeN) {
     return nodeC;
 }
 
-// Insert a node
+// Insert a node into the AVL Tree
+// Balances the tree if necessary
+// Time Complexity: O(log N) - Height balancing ensures logarithmic insertion
+// Space Complexity: O(log N) - Due to recursive function call stack
 template <typename T>
 AVLNode<T>* AVLTree<T>::insert(AVLNode<T>* node, T* data) {
-    if (!node) return new AVLNode<T>(data, keyFunc(data));
+    if (!node) return new AVLNode<T>(data, keyFunc(data)); // Insert new node
 
     int key = keyFunc(data);
 
@@ -74,24 +79,27 @@ AVLNode<T>* AVLTree<T>::insert(AVLNode<T>* node, T* data) {
         return node;
     }
 
-    // Update height manually
+    // Update height after insertion
     node->height = getLarger(height(node->left), height(node->right)) + 1;
 
     // Balance the node
     int balance = getBalance(node);
 
-    // Fix: Assign the rotated subtree to `node`
+    // Left Heavy (Right Rotation)
     if (balance > 1 && key < node->left->key)
         return rightRotate(node);
 
+    // Right Heavy (Left Rotation)
     if (balance < -1 && key > node->right->key)
         return leftRotate(node);
 
+    // Left-Right (Left Rotation then Right Rotation)
     if (balance > 1 && key > node->left->key) {
         node->left = leftRotate(node->left);
         return rightRotate(node);
     }
 
+    // Right-Left (Right Rotation then Left Rotation)
     if (balance < -1 && key < node->right->key) {
         node->right = rightRotate(node->right);
         return leftRotate(node);
@@ -100,7 +108,7 @@ AVLNode<T>* AVLTree<T>::insert(AVLNode<T>* node, T* data) {
     return node;
 }
 
-// Public insert function
+// Public insert function for Actor
 template <>
 void AVLTree<Actor>::insert(Actor* data) {
     int key = keyFunc(data);
@@ -114,14 +122,18 @@ void AVLTree<Movie>::insert(Movie* data) {
     root = insert(root, data);
 }
 
-// Find minimum node in subtree
+// Find the node with the minimum key in a subtree
+// Time Complexity: O(log N)
+// Space Complexity: O(1)
 template <typename T>
 AVLNode<T>* AVLTree<T>::findMin(AVLNode<T>* node) {
     while (node->left) node = node->left;
     return node;
 }
 
-// Remove a node
+// Remove a node from the AVL Tree
+// Time Complexity: O(log N)
+// Space Complexity: O(log N)
 template <typename T>
 AVLNode<T>* AVLTree<T>::remove(AVLNode<T>* node, T* data) {
     if (!node) return nullptr;
@@ -148,8 +160,10 @@ AVLNode<T>* AVLTree<T>::remove(AVLNode<T>* node, T* data) {
 
     if (!node) return nullptr;
 
+    // Update height
     node->height = getLarger(height(node->left), height(node->right)) + 1;
 
+    // Rebalance the tree
     int balance = getBalance(node);
 
     if (balance > 1 && getBalance(node->left) >= 0)
@@ -177,6 +191,9 @@ void AVLTree<T>::remove(T* data) {
     root = remove(root, data);
 }
 
+// Update a node by removing and reinserting
+// Time Complexity: O(log N)
+// Space Complexity: O(log N)
 template <typename T>
 void AVLTree<T>::update(T* oldData, T* newData) {
     remove(oldData);  // Remove old node
@@ -208,7 +225,9 @@ void AVLTree<T>::update(T* oldData, T* newData) {
 //     displayAll(root);
 // }
 
-// Function to display actors in a specific age range
+// Display all actors within a specific age range
+// Time Complexity: O(N) (In-order traversal)
+// Space Complexity: O(N) (Recursive stack)
 template <>
 void AVLTree<Actor>::displayActorsInAgeRange(AVLNode<Actor>* node, int minAge, int maxAge) {
     if (!node) return;
@@ -238,7 +257,10 @@ void AVLTree<Actor>::displayActorsInAgeRange(int minAge, int maxAge) {
     displayActorsInAgeRange(root, minAge, maxAge);
 }
 
-// Function to display movies in a specific release year range
+// Function to display movies released within a given year range
+// Uses in-order traversal to visit nodes in sorted order
+// Time Complexity: O(N) - Visits each node once in the worst case
+// Space Complexity: O(log N) - Due to recursive call stack (worst case O(N) if unbalanced)
 template <>
 void AVLTree<Movie>::displayMoviesInRange(AVLNode<Movie>* node, int minYear, int maxYear) {
     if (!node) return;
