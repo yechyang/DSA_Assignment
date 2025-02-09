@@ -513,7 +513,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
             while (true) {
                 cout << "Enter Actor Name to update (Enter 0 to return to menu): ";
-                
+
                 if (!getline(cin, actorName) || actorName.empty()) {
                     cerr << "Error: Actor name cannot be empty. Please enter a valid name or enter 0 to return.\n";
                     continue;
@@ -523,7 +523,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
                 if (actorName == "0") {
                     cout << "Returning to main menu.\n";
-                    return;  // **FIXED: Breaks out of the update actor process, but keeps the menu running**
+                    return;  // **Returns to menu instead of exiting**
                 }
 
                 actors = actorTable.searchByName(actorName, matchCount);
@@ -535,6 +535,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
                 cerr << "Error: Actor not found. Please enter a valid name or enter 0 to return.\n";
             }
 
+            // Display matched actors
             cout << "\nActors found:\n";
             for (int i = 0; i < matchCount; ++i) {
                 cout << "(" << i + 1 << ") " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
@@ -554,7 +555,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
                 if (choice == 0) {
                     cout << "Returning to main menu.\n";
                     delete[] actors;
-                    continue;  // **FIXED: Returns to the main menu instead of exiting**
+                    return;  // **Returns to menu instead of exiting**
                 }
                 break;
             }
@@ -569,25 +570,20 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             string newName;
             int newBirthYear;
 
-            // Input validation for new name
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            while (true) {
-                cout << "Enter new name (leave empty to keep current, Enter 0 to return to menu): ";
-                getline(cin, newName);
-                trimString(newName);
+            // **Input validation for new name**
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ✅ Flush input buffer once
+            cout << "Enter new name (leave empty to keep current, Enter 0 to skip): ";
+            getline(cin, newName);
+            trimString(newName);
 
-                if (newName == "0") {
-                    cout << "Returning to main menu.\n";
-                    continue;  // **FIXED: Returns to the menu instead of exiting**
-                }
-
-                if (!newName.empty()) {
-                    break;
-                }
-                cerr << "Error: Name cannot be empty. Please enter a valid name or leave blank to keep the current name.\n";
+            if (newName == "0") {
+                cout << "Skipping name update.\n";
+                newName = selectedActor->getName(); // Keep existing name
+            } else if (newName.empty()) {
+                newName = selectedActor->getName(); // Keep existing name
             }
 
-            // Input validation for birth year
+            // **Input validation for birth year**
             while (true) {
                 cout << "Enter new birth year (enter 0 to keep current, Enter -1 to return to menu): ";
                 if (!(cin >> newBirthYear) || (newBirthYear != 0 && newBirthYear != -1 && (newBirthYear < 1800 || newBirthYear > 2025))) {
@@ -599,22 +595,26 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
                 if (newBirthYear == -1) {
                     cout << "Returning to main menu.\n";
-                    continue;  // **FIXED: Returns to the menu instead of exiting**
+                    return;  // **Returns to menu instead of exiting**
+                }
+                if (newBirthYear == 0) {
+                    newBirthYear = selectedActor->getBirthYear(); // Keep existing birth year
                 }
                 break;
             }
 
-            // Update the actor's details
+            // **Update the actor's details**
             selectedActor->updateDetails(newName, newBirthYear);
-
             actorTree.insert(selectedActor);
 
-            cout << "\nActor details updated successfully!";
-            // Display updated movie details    
-            cout << "\nUpdated actor details:" << endl;
+            cout << "\nActor details updated successfully!\n";
+
+            // **Display updated actor details**    
+            cout << "\nUpdated actor details:\n";
             cout << "- ID: " << selectedActor->getId() << endl;
             cout << "- Name: " << selectedActor->getName() << endl;
             cout << "- BirthYear: " << selectedActor->getBirthYear() << endl;
+
         }
         else if (choice == 5) {
             
@@ -685,42 +685,32 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             string newTitle, newPlot;
             int newReleaseYear;
 
-            // Input validation for new title
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            while (true) {
-                cout << "Enter new title (leave empty to keep current, Enter 0 to skip): ";
-                getline(cin, newTitle);
-                trimString(newTitle);
+            // **Input validation for new title**
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); // ✅ Flush input buffer once
+            cout << "Enter new title (leave empty to keep current, Enter 0 to skip): ";
+            getline(cin, newTitle);
+            trimString(newTitle);
 
-                if (newTitle == "0") {
-                    cout << "Skipping title update.\n";
-                    break;  // User skips updating title
-                }
-
-                if (!newTitle.empty()) {
-                    break;
-                }
-                cerr << "Error: Title cannot be empty. Please enter a valid title or leave blank to keep the current title.\n";
+            if (newTitle == "0") {
+                cout << "Skipping title update.\n";
+                newTitle = selectedMovie->getTitle(); // Keep existing title
+            } else if (newTitle.empty()) {
+                newTitle = selectedMovie->getTitle(); // Keep existing title
             }
 
-            // Input validation for new plot
-            while (true) {
-                cout << "Enter new plot (leave empty to keep current, Enter 0 to skip): ";
-                getline(cin, newPlot);
-                trimString(newPlot);
+            // **Input validation for new plot**
+            cout << "Enter new plot (leave empty to keep current, Enter 0 to skip): ";
+            getline(cin, newPlot);
+            trimString(newPlot);
 
-                if (newPlot == "0") {
-                    cout << "Skipping plot update.\n";
-                    break;  // User skips updating plot
-                }
-
-                if (!newPlot.empty()) {
-                    break;
-                }
-                cerr << "Error: Plot cannot be empty. Please enter a valid plot or leave blank to keep the current plot.\n";
+            if (newPlot == "0") {
+                cout << "Skipping plot update.\n";
+                newPlot = selectedMovie->getPlot(); // Keep existing plot
+            } else if (newPlot.empty()) {
+                newPlot = selectedMovie->getPlot(); // Keep existing plot
             }
 
-            // Input validation for release year
+            // **Input validation for release year**
             while (true) {
                 cout << "Enter new release year (enter 0 to keep current, Enter -1 to return to menu): ";
                 if (!(cin >> newReleaseYear) || (newReleaseYear != 0 && newReleaseYear != -1 && (newReleaseYear < 1888 || newReleaseYear > 2025))) {
@@ -734,22 +724,25 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
                     cout << "Returning to main menu.\n";
                     return;  // **Returns to menu instead of exiting**
                 }
+                if (newReleaseYear == 0) {
+                    newReleaseYear = selectedMovie->getReleaseYear(); // Keep existing year
+                }
                 break;
             }
 
-            // Update movie details if necessary
+            // **Update movie details if necessary**
             selectedMovie->updateDetails(newTitle, newPlot, newReleaseYear);
-
             movieTree.insert(selectedMovie);
 
             cout << "\nMovie details updated successfully!\n";
 
-            // Display updated movie details    
+            // **Display updated movie details**    
             cout << "\nUpdated movie details:\n";
             cout << "- ID: " << selectedMovie->getId() << endl;
             cout << "- Title: " << selectedMovie->getTitle() << endl;
             cout << "- Plot: " << selectedMovie->getPlot() << endl;
             cout << "- ReleaseYear: " << selectedMovie->getReleaseYear() << endl;
+
             
         } else if (choice == 6) {
             int minAge, maxAge;
