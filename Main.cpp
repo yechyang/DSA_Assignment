@@ -205,16 +205,16 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
     int choice;
 
     while (true) {
-        cout << "\nMovie Application Menu\n";
-        cout << "1. Add new Actor\n";
-        cout << "2. Add new Movie\n";
-        cout << "3. Add an actor to a movie\n";
-        cout << "4. Update actor details\n";
-        cout << "5. Update movie details\n";
-        cout << "6. Display actors by age range\n";
-        cout << "7. Display Movies Within past 3 years\n";
-        cout << "8. Display all movies of an actor sorted by alphabetical order\n";
-        cout << "9. Display all actors of a movie sorted by alphabetical order\n";
+        cout << "\n-----------------Movie Application Menu-----------------\n";
+        cout << "1.  Add new Actor\n";
+        cout << "2.  Add new Movie\n";
+        cout << "3.  Add an actor to a movie\n";
+        cout << "4.  Update actor details\n";
+        cout << "5.  Update movie details\n";
+        cout << "6.  Display actors by age range\n";
+        cout << "7.  Display Movies Within past 3 years\n";
+        cout << "8.  Display all movies of an actor sorted by alphabetical order\n";
+        cout << "9.  Display all actors of a movie sorted by alphabetical order\n";
         cout << "10. Display a list of all actors that a particular actor knows.\n";
         cout << "11. Update Actor Rating" << endl;
         cout << "12. Update Movie Rating" << endl;
