@@ -355,48 +355,153 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
                 cerr << "Exception occurred: " << e.what() << endl;
             }
         } else if (choice == 3) {
-            int actorId, movieId;
-
-            // Input validation for Actor ID
-            cout << "Enter Actor ID: ";
-            while (!(cin >> actorId) || actorId < 0) {
-                cerr << "Invalid Actor ID. Please enter a positive integer." << endl;
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Enter Actor ID: ";
-            }
-
-            // Input validation for Movie ID
-            cout << "Enter Movie ID: ";
-            while (!(cin >> movieId) || movieId < 0) {
-                cerr << "Invalid Movie ID. Please enter a positive integer." << endl;
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Enter Movie ID: ";
-            }
-
-            // Search for Actor and Movie
-            Actor* actor = actorTable.search(actorId);
-            Movie* movie = movieTable.search(movieId);
-
-            // Ensure both Actor and Movie exist before adding
-            if (!actor) {
-                cerr << "Error: Actor with ID " << actorId << " not found." << endl;
-            }
-            if (!movie) {
-                cerr << "Error: Movie with ID " << movieId << " not found." << endl;
-            }
-
-            // If both exist, establish the relationship
-            if (actor && movie) {
-                // Prevent duplicate additions
-                if (!actor->getMovies().contains(movie) && !movie->getActors().contains(actor)) {
-                    actor->addMovie(movie);
-                    movie->addActor(actor);
-                    cout << "Relationship added successfully!" << endl;
-                } else {
-                    cerr << "Error: Actor is already associated with this movie." << endl;
+            int searchOption;
+    
+            // Ask the user how they want to search
+            while (true) {
+                cout << "Choose search method:\n";
+                cout << "1. Add actor to movie by ID\n";
+                cout << "2. Add actor to movie by Name/Title\n";
+                cout << "Enter choice (1 or 2): ";
+                
+                if (!(cin >> searchOption) || (searchOption != 1 && searchOption != 2)) {
+                    cerr << "Invalid choice. Please enter 1 or 2.\n";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    continue;
                 }
+                break;
+            }
+
+            Actor* actor = nullptr;
+            Movie* movie = nullptr;
+
+            if (searchOption == 1) {
+                // ✅ **Search by ID**
+                int actorId, movieId;
+
+                // Keep prompting until a valid actor ID is entered
+                while (true) {
+                    cout << "Enter Actor ID: ";
+                    if (!(cin >> actorId) || actorId < 0) {
+                        cerr << "Invalid Actor ID. Please enter a positive integer." << endl;
+                        cin.clear();
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        continue;
+                    }
+
+                    actor = actorTable.search(actorId);
+                    if (actor) break; // Actor found
+                    cerr << "Error: Actor with ID " << actorId << " not found. Try again." << endl;
+                }
+
+                // Keep prompting until a valid movie ID is entered
+                while (true) {
+                    cout << "Enter Movie ID: ";
+                    if (!(cin >> movieId) || movieId < 0) {
+                        cerr << "Invalid Movie ID. Please enter a positive integer." << endl;
+                        cin.clear();
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        continue;
+                    }
+
+                    movie = movieTable.search(movieId);
+                    if (movie) break; // Movie found
+                    cerr << "Error: Movie with ID " << movieId << " not found. Try again." << endl;
+                }
+            } 
+            else if (searchOption == 2) {
+                // ✅ **Search by Name & Title**
+                string actorName, movieTitle;
+                int actorMatchCount, movieMatchCount;
+
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Flush input buffer
+
+                // Keep prompting until a valid actor name is entered
+                while (true) {
+                    cout << "Enter Actor Name: ";
+                    getline(cin, actorName);
+
+                    Actor** matchedActors = actorTable.searchByName(actorName, actorMatchCount);
+                    if (matchedActors && actorMatchCount > 0) {
+                        if (actorMatchCount == 1) {
+                            actor = matchedActors[0]; // Only one match
+                        } else {
+                            // If multiple matches, let the user choose
+                            cout << "\nMultiple actors found:\n";
+                            for (int i = 0; i < actorMatchCount; ++i) {
+                                cout << "(" << i + 1 << ") " << matchedActors[i]->getName() << " (ID: " << matchedActors[i]->getId() << ")" << endl;
+                            }
+
+                            int choice;
+                            while (true) {
+                                cout << "Select the correct actor (1 - " << actorMatchCount << "): ";
+                                if (!(cin >> choice) || choice < 1 || choice > actorMatchCount) {
+                                    cerr << "Invalid selection. Please enter a number between 1 and " << actorMatchCount << "." << endl;
+                                    cin.clear();
+                                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                                    continue;
+                                }
+                                actor = matchedActors[choice - 1];
+                                break;
+                            }
+                        }
+                        delete[] matchedActors;
+                        break;
+                        
+                    } else {
+                        cerr << "Error: Actor not found. Try again.\n";
+                    }
+                }
+
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+
+                // Keep prompting until a valid movie title is entered
+                while (true) {
+                    cout << "Enter Movie Title: ";
+                    getline(cin, movieTitle);
+
+                    Movie** matchedMovies = movieTable.searchByTitle(movieTitle, movieMatchCount);
+                    if (matchedMovies && movieMatchCount > 0) {
+                        if (movieMatchCount == 1) {
+                            movie = matchedMovies[0]; // Only one match
+                        } else {
+                            // If multiple matches, let the user choose
+                            cout << "\nMultiple movies found:\n";
+                            for (int i = 0; i < movieMatchCount; ++i) {
+                                cout << "(" << i + 1 << ") " << matchedMovies[i]->getTitle() << " (ID: " << matchedMovies[i]->getId() << ")" << endl;
+                            }
+
+                            int choice;
+                            while (true) {
+                                cout << "Select the correct movie (1 - " << movieMatchCount << "): ";
+                                if (!(cin >> choice) || choice < 1 || choice > movieMatchCount) {
+                                    cerr << "Invalid selection. Please enter a number between 1 and " << movieMatchCount << "." << endl;
+                                    cin.clear();
+                                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                                    continue;
+                                }
+                                movie = matchedMovies[choice - 1];
+                                break;
+                            }
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        }
+                        delete[] matchedMovies;
+                        break;
+                    } else {
+                        cerr << "Error: Movie not found. Try again.\n";
+                    }
+                }
+            }
+
+            // ✅ **Add actor to movie (if not already linked)**
+            if (!actor->getMovies().contains(movie) && !movie->getActors().contains(actor)) {
+                actor->addMovie(movie);
+                movie->addActor(actor);
+                cout << "Relationship added successfully!" << endl;
+            } else {
+                cerr << "Error: Actor is already associated with this movie." << endl;
             }
         } else if (choice == 4) {
             // Update actor details by searching for name
