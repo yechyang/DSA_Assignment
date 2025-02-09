@@ -150,63 +150,35 @@ void Actor::displayKnownActors() const {
     }
 }
 
-//
-// Change to Merge Sort
-//
-// Merge function for sorting actors by rating
-void Actor::mergeByRating(Actor** actors, int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
 
-    // Temporary arrays
-    Actor** leftArray = new Actor*[n1];
-    Actor** rightArray = new Actor*[n2];
 
-    // Copy data to temp arrays
-    for (int i = 0; i < n1; ++i) leftArray[i] = actors[left + i];
-    for (int j = 0; j < n2; ++j) rightArray[j] = actors[mid + 1 + j];
 
-    int i = 0, j = 0, k = left;
+// Insertion Sort for Actors by Rating
+void Actor::insertionSortMoviesByRating(Movie** movies, int count) const {
+    for (int i = 1; i < count; ++i) {
+        Movie* key = movies[i];
+        int j = i - 1;
 
-    // Merge the arrays by rating in **descending** order
-    while (i < n1 && j < n2) {
-        if (leftArray[i]->getRating() <= rightArray[j]->getRating()) {
-            actors[k++] = leftArray[i++];
-        } else {
-            actors[k++] = rightArray[j++];
+        // Move elements that have a LOWER rating forward (higher ratings on top)
+        while (j >= 0 && movies[j]->getRating() < key->getRating()) {
+            movies[j + 1] = movies[j];
+            j = j - 1;
         }
-    }
-
-    // Copy remaining elements
-    while (i < n1) actors[k++] = leftArray[i++];
-    while (j < n2) actors[k++] = rightArray[j++];
-
-    // Free memory
-    delete[] leftArray;
-    delete[] rightArray;
-}
-
-// Merge Sort function for sorting actors by rating
-void Actor::mergeSortByRating(Actor** actors, int left, int right) {
-    if (left < right) {
-        int mid = left + (right - left) / 2;
-
-        // Sort both halves
-        mergeSortByRating(actors, left, mid);
-        mergeSortByRating(actors, mid + 1, right);
-
-        // Merge the sorted halves
-        mergeByRating(actors, left, mid, right);
+        movies[j + 1] = key;
     }
 }
 
-// **Updated Sorting Function (Using Merge Sort)**
-Actor** Actor::sortActorsByRating(Actor** actors, int count) const {
-    if (count > 1) {
-        mergeSortByRating(actors, 0, count - 1);
-    }
-    return actors; // Return sorted array
+Movie** Actor::sortMoviesByRating(int& count) const {
+    Movie** movieArray = movies.toArray(count);
+    if (count == 0) return nullptr;
+
+    // Sort by rating (descending order)
+    insertionSortMoviesByRating(movieArray, count);
+
+    return movieArray;
 }
+
+
 
 void Actor::recommendActorsByRating(Actor** actors, int totalActors, float minRating) const {
     cout << "\nActors with rating higher than " << minRating << ":\n";

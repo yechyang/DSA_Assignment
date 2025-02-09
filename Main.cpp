@@ -187,11 +187,11 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
     while (true) {
         cout << "\nMovie Application Menu\n";
-        cout << "1. Add new actor\n";
-        cout << "2. Add new movie\n";
+        cout << "1. Add new Actor\n";
+        cout << "2. Add new Movie\n";
         cout << "3. Add an actor to a movie\n";
-        cout << "4. Display all actors in a movie\n";
-        cout << "5. Display all movies of an actor\n";
+        cout << "4. Display all Actors in a Movie\n";
+        cout << "5. Display all Movies of an Actor\n";
         cout << "6. Exit\n";
         cout << "7. Update actor details\n";
         cout << "8. Update movie details\n";
@@ -200,8 +200,8 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
         cout << "11. Display a list of all actors that a particular actor knows.\n";
         cout << "12. Update Actor Rating" << endl;
         cout << "13. Update Movie Rating" << endl;
-        cout << "14. Display Actor By Rating" << endl;
-        cout << "15. Display Movie By Rating" << endl;
+        cout << "14. Display all Movies of an Actor Sorted by Ratings" << endl;
+        cout << "15. Display all Actors in a Movie Sorted by Ratings" << endl;
         cout << "16. Recommendations based on rating of Movie.\n";
         cout << "17. Recommendations based on rating of Actor (with Movies).\n";
         cout << "Enter your choice: ";
@@ -291,7 +291,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched movies
             cout << "Movies found:" << endl;
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << " (Year: " << movies[i]->getReleaseYear() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << ", Year: " << movies[i]->getReleaseYear() << endl;
             }
 
             // User selects a movie
@@ -308,14 +308,25 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Retrieve selected movie
             Movie* selectedMovie = movies[choice - 1];
             delete[] movies;  // Free allocated memory
+            // Display movie details
+            cout << "\nMovie details:" << endl;
+            cout << "- ID: " << selectedMovie->getId() << endl;
+            cout << "- Title: " << selectedMovie->getTitle() << endl;
+            cout << "- Year: " << selectedMovie->getReleaseYear() << endl;
+            cout << "- Plot: " << selectedMovie->getPlot() << endl;
 
             // Get and display sorted actors in the selected movie
             int actorCount;
             Actor** sortedActors = selectedMovie->getSortedActors(actorCount);
-
-            cout << "Actors in the movie \"" << selectedMovie->getTitle() << "\" (sorted alphabetically):" << endl;
-            for (int i = 0; i < actorCount; ++i) {
-                cout << "- ID: " << sortedActors[i]->getId() << ", Name: " << sortedActors[i]->getName() << endl;
+            if (actorCount == 0 || sortedActors == nullptr) {
+                cout << "\nThis movie has no actors recorded." << endl;
+            } else {
+                cout << "\nActors in the movie \"" << selectedMovie->getTitle() << "\" (sorted alphabetically):" << endl;
+                for (int i = 0; i < actorCount; ++i) {
+                    cout << "- ID: " << sortedActors[i]->getId() 
+                        << ", Name: " << sortedActors[i]->getName() << endl;
+                }
+                delete[] sortedActors; // Free allocated memory
             }
 
             delete[] sortedActors; // Free allocated memory
@@ -337,7 +348,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched actors
             cout << "Actors found:" << endl;
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << " (BirthYear: " << actors[i]->getBirthYear() << ")" << endl;
+                cout << "(" << i + 1 << ") "  <<"- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << ", BirthYear: " << actors[i]->getBirthYear() << endl;
             }
 
             // User selects an actor
@@ -355,17 +366,28 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             Actor* selectedActor = actors[choice - 1];
             delete[] actors;  // Free allocated memory
 
+            // Display movie details
+            cout << "\nActor details:" << endl;
+            cout << "- ID: " << selectedActor->getId() << endl;
+            cout << "- Name: " << selectedActor->getName() << endl;
+            cout << "- BirthYear: " << selectedActor->getBirthYear() << endl;
+
+
             // Get and display sorted movies for the selected actor
             int movieCount;
             Movie** sortedMovies = selectedActor->getSortedMovies(movieCount);
 
-            cout << "Movies starring " << selectedActor->getName() << " (sorted alphabetically):" << endl;
-            for (int i = 0; i < movieCount; ++i) {
-                cout << "- Title: " << sortedMovies[i]->getTitle()
-                    << ", Year: " << sortedMovies[i]->getReleaseYear() << endl;
+            if (movieCount == 0 || sortedMovies == nullptr) {
+                cout << "\nThis Actor has not act in a movie." << endl;
+            } else{
+                cout << "\nMovies starring " << selectedActor->getName() << " (sorted alphabetically):" << endl;
+                for (int i = 0; i < movieCount; ++i) {
+                    cout << "- ID: " << sortedMovies[i]->getId() << ", Title: " << sortedMovies[i]->getTitle() << ", Year: " << sortedMovies[i]->getReleaseYear() << endl;
+                }
+                delete[] sortedMovies; // Free allocated memory
             }
 
-            delete[] sortedMovies; // Free allocated memory
+            
         } else if (choice == 6) {
             // Exit
             cout << "Exiting application. Goodbye!" << endl;
@@ -388,7 +410,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched actors
             cout << "\nActors found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << " (BirthYear: " << actors[i]->getBirthYear() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << ", BirthYear: " << actors[i]->getBirthYear() << endl;
             }
 
             // User selects an actor
@@ -429,6 +451,12 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             }
             
             cout << "\nActor details updated successfully!" << endl;
+
+            // Display updated actor details
+            cout << "\nUpdated actor details:" << endl;
+            cout << "- ID: " << selectedActor->getId() << endl;
+            cout << "- Name: " << selectedActor->getName() << endl;
+            cout << "- BirthYear: " << selectedActor->getBirthYear() << endl;
         } else if (choice == 8) {
             // Update movie details by searching for title
             string movieTitle;
@@ -447,7 +475,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched movies
             cout << "\nMovies found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << " (Year: " << movies[i]->getReleaseYear() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << ", Year: " << movies[i]->getReleaseYear() << endl;
             }
 
             // User selects a movie
@@ -482,6 +510,13 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
             movieTree.insert(selectedMovie);
             cout << "\nMovie details updated successfully!" << endl;
+
+            // Display updated movie details    
+            cout << "\nUpdated movie details:" << endl;
+            cout << "- ID: " << selectedMovie->getId() << endl;
+            cout << "- Title: " << selectedMovie->getTitle() << endl;
+            cout << "- Plot: " << selectedMovie->getPlot() << endl;
+            cout << "- ReleaseYear: " << selectedMovie->getReleaseYear() << endl;
         } else if (choice == 9) {
             int minAge, maxAge;
             cout << "Enter the minimum age (x): ";
@@ -523,7 +558,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
            // Display matched actors
            cout << "\nActors found:\n";
            for (int i = 0; i < matchCount; ++i) {
-               cout << "(" << i + 1 << ") " << actors[i]->getName() << " (ID: " << actors[i]->getId() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << ", BirthYear: " << actors[i]->getBirthYear() << endl;
            }
 
            // User selects an actor
@@ -561,7 +596,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched actors
             cout << "\nActors found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << " (BirthYear: " << actors[i]->getBirthYear() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << ", BirthYear: " << actors[i]->getBirthYear() << endl;
             }
 
             // Let user pick an actor from the list
@@ -604,7 +639,7 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
             // Display matched movies
             cout << "\nMovies found:\n";
             for (int i = 0; i < matchCount; ++i) {
-                cout << "(" << i + 1 << ") "<< "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << " (Year: " << movies[i]->getReleaseYear() << ")" << endl;
+                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << ", Year: " << movies[i]->getReleaseYear() << endl;
             }
 
             // Let user pick a movie from the list
@@ -630,53 +665,117 @@ void runApplication(Dictionary<Actor>& actorTable, Dictionary<Movie>& movieTable
 
             cout << "\nRating updated successfully for \"" << selectedMovie->getTitle() << "\"!" << endl;
         } else if (choice == 14) {
-            // Collect all actors from the hash table
-            allActors = new Actor*[actorTable.getSize()];
-            totalActors = 0;
+            string actorName;
+            cout << "Enter Actor name: ";
+            cin.ignore();
+            getline(cin, actorName);  // Use getline to capture full actor name
 
-            actorTable.display(collectActors); // Collect all actors into allActors array
+            int matchCount;
+            Actor** actors = actorTable.searchByName(actorName, matchCount);
 
-            if (totalActors == 0) {
-                cout << "\nNo actors available to display." << endl;
-            } else {
-                // Sort the actors by rating
-                allActors[0]->sortActorsByRating(allActors, totalActors);
-
-                // Display sorted actors
-                cout << "\nActors sorted by rating (highest to lowest):" << endl;
-                for (int i = 0; i < totalActors; ++i) {
-                    cout << "- ID: " << allActors[i]->getId()
-                        << ", Name: " << allActors[i]->getName()
-                        << ", Rating: " << allActors[i]->getRating() << endl;
-                }
+            if (!actors) {
+                cerr << "Error: Actor not found." << endl;
+                return;
             }
 
-            delete[] allActors; // Free allocated memory
-            allActors = nullptr;
+            // Display matched actors
+            cout << "Actors found:" << endl;
+            for (int i = 0; i < matchCount; ++i) {
+                cout << "(" << i + 1 << ") " << "- ID: " << actors[i]->getId() << ", Name: " << actors[i]->getName() << ", BirthYear: " << actors[i]->getBirthYear() << ", Rating: " << actors[i]->getRating() << endl;
+            }
+
+            // User selects an actor
+            int choice;
+            cout << "Enter the number of the actor you want: ";
+            cin >> choice;
+
+            if (choice < 1 || choice > matchCount) {
+                cerr << "Invalid selection." << endl;
+                delete[] actors;
+                return;
+            }
+
+            // Retrieve selected actor
+            Actor* selectedActor = actors[choice - 1];
+            delete[] actors;  // Free allocated memory
+
+            // Display movie details
+            cout << "\nActor details:" << endl;
+            cout << "- ID: " << selectedActor->getId() << endl;
+            cout << "- Name: " << selectedActor->getName() << endl;
+            cout << "- BirthYear: " << selectedActor->getBirthYear() << endl;
+            cout << "- Rating: " << selectedActor->getRating() << endl;
+
+
+            // Get and display sorted actors in the selected movie
+            int movieCount;
+            Movie** sortedMovies = selectedActor->sortMoviesByRating(movieCount);
+
+            cout << "\nMovies starring " << selectedActor->getName() << " (Sorted by Rating):" << endl;
+            for (int i = 0; i < movieCount; ++i) {
+                cout << "- ID: " << sortedMovies[i]->getId() << ", Title: " << sortedMovies[i]->getTitle() << " Year: " << sortedMovies[i]->getReleaseYear() << ", Rating: " << sortedMovies[i]->getRating() << endl;
+            }
+
+            delete[] sortedMovies; // Free allocated memory
         } else if (choice == 15) {
-            // Collect all movies from the hash table
-            recentMovies = new Movie*[movieTable.getSize()];
-            movieCount = 0;
+            string movieName;
+            cout << "Enter Movie name: ";
+            cin.ignore();
+            getline(cin, movieName);  // Use getline to capture full movie name
 
-            movieTable.display(collectAllMovies); // Collect all movies into recentMovies array
+            int matchCount;
+            Movie** movies = movieTable.searchByTitle(movieName, matchCount);
 
-            if (movieCount == 0) {
-                cout << "\nNo movies available to display." << endl;
-            } else {
-                // Sort the movies by rating
-                recentMovies[0]->sortMoviesByRating(recentMovies, movieCount);
-
-                // Display sorted movies
-                cout << "\nMovies sorted by rating (highest to lowest):" << endl;
-                for (int i = 0; i < movieCount; ++i) {
-                    cout << "- ID: " << recentMovies[i]->getId()
-                        << ", Title: " << recentMovies[i]->getTitle()
-                        << ", Rating: " << recentMovies[i]->getRating() << endl;
-                }
+            if (!movies) {
+                cerr << "Error: Movie not found." << endl;
+                return;
             }
 
-            delete[] recentMovies; // Free allocated memory
-            recentMovies = nullptr;
+            // Display matched movies
+            cout << "Movies found:" << endl;
+            for (int i = 0; i < matchCount; ++i) {
+                cout << "(" << i + 1 << ") " << "- ID: " << movies[i]->getId() << ", Title: " << movies[i]->getTitle() << ", Year: " << movies[i]->getReleaseYear() << ", Rating: " << movies[i]->getRating() << endl;
+            }
+
+            // User selects a movie
+            int choice;
+            cout << "Enter the number of the movie you want: ";
+            cin >> choice;
+
+            if (choice < 1 || choice > matchCount) {
+                cerr << "Invalid selection." << endl;
+                delete[] movies;
+                return;
+            }
+
+            // Retrieve selected movie
+            Movie* selectedMovie = movies[choice - 1];
+            delete[] movies;  // Free allocated memory
+
+            // Display movie details
+            cout << "\nMovie details:" << endl;
+            cout << "- ID: " << selectedMovie->getId() << endl;
+            cout << "- Title: " << selectedMovie->getTitle() << endl;
+            cout << "- Year: " << selectedMovie->getReleaseYear() << endl;
+            cout << "- Plot: " << selectedMovie->getPlot() << endl;
+            cout << "- Rating: " << selectedMovie->getRating() << endl;
+
+            // Get and display sorted actors in the selected movie
+            int actorCount;
+            Actor** sortedActors = selectedMovie->sortActorsByRating(actorCount);
+
+            if (actorCount == 0 || sortedActors == nullptr) {
+                cout << "\nThis movie has no actors recorded." << endl;
+            } else{
+                cout << "Actors in the movie \"" << selectedMovie->getTitle() << "\" (Sorted by Rating):" << endl;
+                for (int i = 0; i < actorCount; ++i) {
+                    cout << "(" << i + 1 << ") " << "- ID: " << sortedActors[i]->getId() << ", Name: " << sortedActors[i]->getName() << ", BirthYear: " << sortedActors[i]->getBirthYear() << ", Rating: " << sortedActors[i]->getRating() << endl;
+                }
+
+                delete[] sortedActors; // Free allocated memory
+            }
+            
+        
         } else if (choice == 16) {
 
             int subChoice;

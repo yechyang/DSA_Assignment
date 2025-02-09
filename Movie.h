@@ -17,8 +17,6 @@ private:
     LinkedList<Actor> actors; // Linked list for storing actors LinkedList<Actor>
     float rating;           // Movie's rating
     static void displayActorInfo(const Actor& actor);
-    static void mergeByRating(Movie** movies, int left, int mid, int right);
-    static void mergeSortByRating(Movie** movies, int left, int right);
 
 public:
     // Constructor & Destructor
@@ -51,7 +49,10 @@ public:
     // Get sorted actors by name
     Actor** getSortedActors(int& count) const;
 
-    Movie** sortMoviesByRating(Movie** movies, int count) const;
+    Actor** sortActorsByRating(int& count) const;
+    void insertionSortActorsByRating(Actor** actors, int count) const;
+
+
 
     void recommendMoviesByRating(Movie** movies, int totalMovies, float minRating) const;
     void recommendMoviesByYear(Movie** movies, int totalMovies, int year) const;
